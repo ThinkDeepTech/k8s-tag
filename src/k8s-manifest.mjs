@@ -1,23 +1,28 @@
+import k8s from '@kubernetes/client-node';
+import {stringify} from 'yaml';
+import {K8sObject} from './k8s-object.mjs';
+
 class K8sManifest {
     constructor(parsedYaml) {
-        // TODO
         this._yaml = parsedYaml;
+        this._obj = new K8sObject(parsedYaml);
     }
 
     kind() {
-        // TODO
+        return this._yaml.kind;
     }
 
     metadata() {
-        // TODO
+        return this._obj.metadata();
     }
 
-    toObject() {
+    object() {
         // TODO
+        return this._obj.toK8sClientObject();
     }
 
     toString() {
-
+        return stringify(this._yaml);
     }
 }
 

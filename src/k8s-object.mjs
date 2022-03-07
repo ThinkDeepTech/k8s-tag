@@ -1,30 +1,31 @@
+import { stringify } from "yaml";
+
 class K8sObject {
     constructor(parsedYaml) {
 
-        this._api = new K8sApi(parsedYaml);
-        this._manifest = new K8sManifest(parsedYaml);
+        if (!parsedYaml || !parsedYaml.kind)
+            throw new Error(`The parsed yaml couldn't be used to construct a k8s object.\n${stringify(parsedYaml)}`);
 
-        // this._api = api(this._yaml);
-        // this._kind = kind(this._yaml);
-        // this._metadata = metadata(this._yaml);
-        // this._obj = new this._kind(this._yaml);
+        this._obj = this._constructObject(parsedYaml);
     }
 
-    async create () {
-        // const strategy = creationStrategy(this._api, this._kind);
-        // strategy(this._metadata.namespace, this._obj);
-        this._api.create(this._manifest);
+    _constructObject(parsedYaml) {
 
+        for (const node in parsedYaml) {
+            const obj = this._k8sClientObject(node, parsedYaml[node]);
+        }
     }
 
-    async delete () {
-        // const strategy = deletionStrategy(this._api, this._kind);
-        // strategy(this._metadata.namespace, this._obj);
-        this._api.delete(this._manifest);
-    }
+    _k8sClientObject(node, nodeValue) {
+        if (typeof nodeValue !== 'object' && !Array.isArray(nodeValue)) {
+            return nodeValue;
+        } else if (Array.isArray(nodeValue)) {
+            // TODO:
+        } else {
+            const k8sClientObject = this._convertToK8sClientObject(nodeValue)
+            const obj = this._constructObject(nodeValue);
 
-    toString() {
-        // TODO
+        }
     }
 }
 
