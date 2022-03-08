@@ -40,24 +40,8 @@ class K8sObject {
 
     _value(key, value) {
         if (typeof value !== 'object' && !Array.isArray(value)) {
-
             return value;
-
-        } else if (Array.isArray(value)) {
-
-            let singularKey = key;
-            if (key.endsWith('s')) {
-                singularKey = key.slice(0, key.length - 1);
-            }
-
-            let result = [];
-            for (const obj of value) {
-                result.push(this._k8sClientObject(singularKey, obj));
-            }
-            return result;
-
         } else {
-
             return this._k8sClientObject(key, value);
         }
     }
@@ -67,6 +51,7 @@ class K8sObject {
         switch(key.toLowerCase()) {
             case 'cronjob': {
 
+                console.log(`Creating cron job`);
                 const subject = new k8s.V1CronJob();
 
                 this._runTransform(obj, (field, obj) => {
@@ -145,6 +130,16 @@ class K8sObject {
 
                 return subject;
             }
+            case 'containers': {
+
+                let vals = [];
+
+                for (const entry of obj) {
+                    vals.push(this._k8sClientObject('container', entry));
+                }
+
+                return vals
+            }
             case 'container': {
 
                 const subject = new k8s.V1Container();
@@ -155,13 +150,24 @@ class K8sObject {
 
                 return subject;
             }
+            case 'envfrom': {
+
+                let vals = [];
+
+                for (const entry of obj) {
+                    const type = Object.keys(entry)[0];
+                    vals.push(this._k8sClientObject(type, entry[type]));
+                }
+
+                return vals;
+            }
             case 'secretref': {
 
                 const subject = new k8s.V1EnvFromSource();
                 const secretRef = new k8s.V1SecretEnvSource();
 
                 this._runTransform(obj, (field, obj) => {
-                    subject[field] = this._value(field, obj[field]);
+                    secretRef[field] = this._value(field, obj[field]);
                 });
 
                 subject.secretRef = secretRef;
@@ -177,6 +183,8 @@ class K8sObject {
     _runTransform(obj, transform, exclusions = []) {
         for (const field in obj) {
             if (!exclusions.includes(field)) {
+
+                console.log(`Running transform on field ${field} for object ${JSON.stringify(obj)}`);
                 transform(field, obj);
             }
         }
