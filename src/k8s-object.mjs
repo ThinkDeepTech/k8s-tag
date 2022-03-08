@@ -1,11 +1,11 @@
-import { stringify } from "yaml";
+import yaml from "yaml";
 import k8s from "@kubernetes/client-node";
 
 class K8sObject {
     constructor(parsedYaml) {
 
         if (!parsedYaml || !parsedYaml.kind)
-            throw new Error(`The parsed yaml couldn't be used to construct a k8s object.\n${stringify(parsedYaml)}`);
+            throw new Error(`The parsed yaml couldn't be used to construct a k8s object.\n${yaml.stringify(parsedYaml)}`);
 ;
         this._obj = this._k8sClientObject(parsedYaml.kind, parsedYaml);
     }

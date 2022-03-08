@@ -1,5 +1,4 @@
-import k8s from '@kubernetes/client-node';
-import {stringify} from 'yaml';
+import yaml from 'yaml';
 import {K8sObject} from './k8s-object.mjs';
 
 class K8sManifest {
@@ -17,12 +16,11 @@ class K8sManifest {
     }
 
     object() {
-        // TODO
         return this._obj.k8sClientObject();
     }
 
     toString() {
-        return stringify(this._yaml);
+        return yaml.stringify(this._yaml);
     }
 }
 
