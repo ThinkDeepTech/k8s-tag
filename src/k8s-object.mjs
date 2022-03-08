@@ -38,38 +38,54 @@ class K8sObject {
     //                             restartPolicy: "Never"
     //     `;
 
-    _value(fieldValue) {
-        if (typeof fieldValue !== 'object' && !Array.isArray(fieldValue)) {
-            return fieldValue;
-        } else if (Array.isArray(fieldValue)) {
-            // TODO:
+    _value(key, value) {
+        if (typeof value !== 'object' && !Array.isArray(value)) {
+
+            return value;
+
+        } else if (Array.isArray(value)) {
+
+            let singularKey = key;
+            if (key.endsWith('s')) {
+                singularKey = key.slice(0, key.length - 1);
+            }
+
+            let result = [];
+            for (const obj of value) {
+                result.push(this._k8sClientObject(singularKey, obj));
+            }
+            return result;
+
         } else {
-            return this._k8sClientObject(fieldValue);
+
+            return this._k8sClientObject(key, value);
         }
     }
 
-    _k8sClientObject(obj) {
+    _k8sClientObject(key, obj) {
 
-        // TODO: This can't be done here if it's the recursive fcn. Create top-level case.
-        const k8sKind = obj.kind.toLowerCase();
-        switch(k8sKind) {
+        switch(key.toLowerCase()) {
             case 'cronjob': {
 
                 const subject = new k8s.V1CronJob();
-                const spec = new k8s.V1CronJobSpec();
 
-                // TODO: Abstract out into functions for spec and subject and change in all other places.
-                for (const field in parsedYaml) {
-                    if (field === 'spec') continue;
+                this._runTransform(obj, (field, obj) => {
+                    subject[field] = this._value(field, obj[field]);
+                }, ['spec']);
 
-                    subject[field] = this._value(parsedYaml[field]);
-                }
+                subject.spec = this._value('cronjob:spec', obj['spec']);
 
-                for (const field in parsedYaml['spec']) {
-                    spec[field] = this._value(parsedYaml['spec'][field]);
-                }
+                return subject;
+            }
+            case 'cronjob:spec': {
 
-                subject.spec = spec;
+                const subject = new k8s.V1CronJobSpec();
+
+                this._runTransform(obj, (field, obj) => {
+                    subject[field] = this._value(field, obj[field]);
+                }, ['jobTemplate']);
+
+                subject.jobTemplate = this._value('job:template', obj['jobTemplate']);
 
                 return subject;
             }
@@ -77,61 +93,97 @@ class K8sObject {
 
                 const subject = new k8s.V1ObjectMeta();
 
-                for (const field in parsedYaml) {
-                    subject[field] = this._value(parsedYaml[field]);
+                for (const field in obj) {
+                    subject[field] = this._value(field, obj[field]);
                 }
 
                 return subject;
             }
-            case 'jobtemplate': {
+            case 'job:template': {
 
                 const subject = new k8s.V1JobTemplateSpec();
-                const jobSpec = new k8s.V1JobSpec();
-                const podTemplateSpec = new k8s.V1PodTemplateSpec();
-                const podSpec = new k8s.V1PodSpec();
 
-                for (const field in obj) {
-                    if (field === 'spec') continue;
+                this._runTransform(obj, (field, obj) => {
+                    subject[field] = this._value(field, obj[field]);
+                }, ['spec']);
 
-                    subject[field] = this._value(parsedYaml[field]);
-                }
-
-                for (const field in parsedYaml['spec']) {
-                    spec[field] = this._value(parsedYaml['spec'][field]);
-                }
-
-                podTemplateSpec.spec = podSpec;
-                jobSpec.template = podTemplateSpec;
-                subject.spec = jobSpec;
+                subject.spec = this._value('job:spec', obj['spec']);
 
                 return subject;
             }
-            case 'pod': {
+            case 'job:spec': {
 
+                const subject = new k8s.V1JobSpec();
 
-                const podSpec = new k8s.V1PodSpec();
+                this._runTransform(obj, (field, obj) => {
+                    subject[field] = this._value(field, obj[field]);
+                }, ['template']);
 
-                for (const field in obj) {
-                    if (field === 'spec') continue;
-
-                    subject[field] = this._value(parsedYaml[field]);
-                }
-
-                for (const field in parsedYaml['spec']) {
-                    spec[field] = this._value(parsedYaml['spec'][field]);
-                }
-
-                podTemplateSpec.spec = podSpec;
-                jobSpec.template = podTemplateSpec;
-                subject.spec = jobSpec;
+                subject.template = this._value('pod:template', obj['template']);
 
                 return subject;
+            }
+            case 'pod:template': {
+
+                const subject = new k8s.V1PodTemplateSpec();
+
+                this._runTransform(obj, (field, obj) => {
+                    subject[field] = this._value(field, obj[field]);
+                }, ['spec']);
+
+                subject.spec = this._value('pod:spec', obj['spec']);
+
+                return subject;
+            }
+            case 'pod:spec': {
+
+                const subject = new k8s.V1PodSpec();
+
+                this._runTransform(obj, (field, obj) => {
+                    subject[field] = this._value(field, obj[field]);
+                });
+
+                return subject;
+            }
+            case 'container': {
+
+                const subject = new k8s.V1Container();
+
+                this._runTransform(obj, (field, obj) => {
+                    subject[field] = this._value(field, obj[field]);
+                });
+
+                return subject;
+            }
+            case 'secretref': {
+
+                const subject = new k8s.V1EnvFromSource();
+                const secretRef = new k8s.V1SecretEnvSource();
+
+                this._runTransform(obj, (field, obj) => {
+                    subject[field] = this._value(field, obj[field]);
+                });
+
+                subject.secretRef = secretRef;
+
+                return subject;
+            }
+            default: {
+                throw new Error(`The specified key wasn't found: ${key}`);
+            }
+        }
+    }
+
+    _runTransform(obj, transform, exclusions = []) {
+        for (const field in obj) {
+            if (!exclusions.includes(field)) {
+                transform(field, obj);
             }
         }
     }
 
     _constructObject(parsedYaml) {        ;
-        return this._k8sClientObject(parsedYaml);
+        return this._k8sClientObject(parsedYaml.kind, parsedYaml);
     }
 }
 
