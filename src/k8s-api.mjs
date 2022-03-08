@@ -8,17 +8,21 @@ class K8sApi {
     }
 
     async create(manifest) {
+        console.log(`Creating: ${manifest.toString()}`);
         return this._creationStrategy(manifest)();
     }
 
     async delete(manifest) {
+        console.log(`Deleting: ${manifest.toString()}`);
         return this._deletionStrategy(manifest)();
     }
 
     _creationStrategy(manifest) {
+        console.log('Fetching creation strategy');
         switch(manifest.kind()) {
             case 'CronJob': {
-                return this._api.createNamespacedCronJob.bind(this._api, manifest.metadata().namespace, manifest.k8sClientObject());
+                console.log(`Using cron job creation strategy for ${JSON.stringify(manifest.metadata())} \n ${JSON.stringify(manifest.object())}`)
+                return this._api.createNamespacedCronJob.bind(this._api, manifest.metadata().namespace, manifest.object());
             }
             default: {
                 throw new Error(`K8s manifest kind not recognized. Received: ${manifest.kind()}`);
