@@ -9,15 +9,15 @@ class K8sClient {
     }
 
     async create () {
-        this._api.create(this._manifest);
+        return this._api.create(this._manifest);
     }
 
     async delete () {
-        this._api.delete(this._manifest);
+        return this._api.delete(this._manifest);
     }
 
     toString() {
-        this._manifest.toString();
+        return this._manifest.toString();
     }
 }
 
