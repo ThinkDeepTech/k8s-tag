@@ -18,7 +18,7 @@ class K8sApi {
     _creationStrategy(manifest) {
         switch(manifest.kind()) {
             case 'CronJob': {
-                return this._api.createNamespacedCronJob.bind(this._api, manifest.metadata().namespace(), manifest.object());
+                return this._api.createNamespacedCronJob.bind(this._api, manifest.metadata().namespace, manifest.k8sClientObject());
             }
             default: {
                 throw new Error(`K8s manifest kind not recognized. Received: ${manifest.kind()}`);
@@ -29,7 +29,7 @@ class K8sApi {
     _deletionStrategy(manifest) {
         switch(manifest.kind()) {
             case 'CronJob': {
-                return this._api.deleteNamespacedCronJob.bind(this._api, manifest.metadata().name(), manifest.metadata().namespace());
+                return this._api.deleteNamespacedCronJob.bind(this._api, manifest.metadata().name, manifest.metadata().namespace);
             }
             default: {
                 throw new Error(`K8s manifest kind not recognized. Received: ${manifest.kind()}`);

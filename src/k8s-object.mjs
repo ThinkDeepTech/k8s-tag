@@ -6,37 +6,17 @@ class K8sObject {
 
         if (!parsedYaml || !parsedYaml.kind)
             throw new Error(`The parsed yaml couldn't be used to construct a k8s object.\n${stringify(parsedYaml)}`);
-
-        this._obj = this._constructObject(parsedYaml);
+;
+        this._obj = this._k8sClientObject(parsedYaml.kind, parsedYaml);
     }
 
-    // const cronjob = k8s`
-    //         apiVersion: "batch/v1"
-    //         kind: "CronJob"
-    //         metadata:
-    //             name: "${options.name}"
-    //             namespace: "${options.namespace || "default"}"
-    //         spec:
-    //             schedule: "${options.schedule}"
-    //             jobTemplate:
-    //                 spec:
-    //                     template:
-    //                         spec:
-    //                             containers:
-    //                                 - name: "${process.env.HELM_RELEASE_NAME}-data-collector"
-    //                                 image: "${options.image}"
-    //                                 command: "${options.command}"
-    //                                 args: ${options.args}
-    //                                 envFrom:
-    //                                     - secretRef:
-    //                                         name: "${process.env.HELM_RELEASE_NAME}-deep-microservice-collection-secret"
-    //                                     ${ process.env.PREDECOS_KAFKA_SECRET ? `
-    //                                     - secretRef:
-    //                                         name: "${process.env.PREDECOS_KAFKA_SECRET}"
-    //                                     ` : ``}
-    //                             serviceAccountName: "${process.env.HELM_RELEASE_NAME}-secret-accessor-service-account"
-    //                             restartPolicy: "Never"
-    //     `;
+    metadata() {
+        return this._obj.metadata;
+    }
+
+    k8sClientObject() {
+        return this._obj;
+    }
 
     _value(key, value) {
         if (typeof value !== 'object' && !Array.isArray(value)) {
@@ -64,6 +44,7 @@ class K8sObject {
             }
             case 'cronjob:spec': {
 
+                console.log(`Creating cron job spec`);
                 const subject = new k8s.V1CronJobSpec();
 
                 this._runTransform(obj, (field, obj) => {
@@ -76,6 +57,7 @@ class K8sObject {
             }
             case 'metadata': {
 
+                console.log(`Creating metadata`);
                 const subject = new k8s.V1ObjectMeta();
 
                 for (const field in obj) {
@@ -86,6 +68,7 @@ class K8sObject {
             }
             case 'job:template': {
 
+                console.log(`Creating job template`);
                 const subject = new k8s.V1JobTemplateSpec();
 
                 this._runTransform(obj, (field, obj) => {
@@ -98,6 +81,7 @@ class K8sObject {
             }
             case 'job:spec': {
 
+                console.log(`Creating job spec`);
                 const subject = new k8s.V1JobSpec();
 
                 this._runTransform(obj, (field, obj) => {
@@ -110,6 +94,7 @@ class K8sObject {
             }
             case 'pod:template': {
 
+                console.log(`Creating pod template`);
                 const subject = new k8s.V1PodTemplateSpec();
 
                 this._runTransform(obj, (field, obj) => {
@@ -122,6 +107,7 @@ class K8sObject {
             }
             case 'pod:spec': {
 
+                console.log(`Creating pod spec`);
                 const subject = new k8s.V1PodSpec();
 
                 this._runTransform(obj, (field, obj) => {
@@ -132,8 +118,8 @@ class K8sObject {
             }
             case 'containers': {
 
+                console.log(`Creating containers`);
                 let vals = [];
-
                 for (const entry of obj) {
                     vals.push(this._k8sClientObject('container', entry));
                 }
@@ -142,6 +128,7 @@ class K8sObject {
             }
             case 'container': {
 
+                console.log(`Creating container`);
                 const subject = new k8s.V1Container();
 
                 this._runTransform(obj, (field, obj) => {
@@ -152,8 +139,8 @@ class K8sObject {
             }
             case 'envfrom': {
 
+                console.log(`Creating envFrom`);
                 let vals = [];
-
                 for (const entry of obj) {
                     const type = Object.keys(entry)[0];
                     vals.push(this._k8sClientObject(type, entry[type]));
@@ -163,6 +150,7 @@ class K8sObject {
             }
             case 'secretref': {
 
+                console.log(`Creating secretref`);
                 const subject = new k8s.V1EnvFromSource();
                 const secretRef = new k8s.V1SecretEnvSource();
 
@@ -188,10 +176,6 @@ class K8sObject {
                 transform(field, obj);
             }
         }
-    }
-
-    _constructObject(parsedYaml) {        ;
-        return this._k8sClientObject(parsedYaml.kind, parsedYaml);
     }
 }
 

@@ -18,7 +18,7 @@ class K8sManifest {
 
     object() {
         // TODO
-        return this._obj.toK8sClientObject();
+        return this._obj.k8sClientObject();
     }
 
     toString() {
