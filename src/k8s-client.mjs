@@ -1,3 +1,6 @@
+import {K8sApi} from './k8s-api.mjs';
+import {K8sManifest} from './k8s-manifest.mjs';
+
 class K8sClient {
     constructor(parsedYaml) {
 
