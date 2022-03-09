@@ -16,7 +16,7 @@ describe('k8s-tag', () => {
             namespace: 'default',
             schedule: '* * * * *',
             image: 'busybox:latest',
-            command: 'ls',
+            command: ['ls'],
             args: ['something', 'else']
         };
 
@@ -163,7 +163,7 @@ describe('k8s-tag', () => {
             namespace: 'default',
             schedule: '* * * * *',
             image: 'busybox:latest',
-            command: 'ls',
+            command: ['node'],
             args: ['something', 'else']
         };
 
@@ -213,7 +213,7 @@ describe('k8s-tag', () => {
         const container = actual.spec.template.spec.containers[0];
         expect(container.constructor.name).to.include('Container');
         expect(container.image).to.equal(options.image);
-        expect(container.command).to.equal(options.command);
+        expect(container.command[0]).to.equal(options.command[0]);
         expect(container.args[0]).to.equal(options.args[0]);
         expect(container.args[1]).to.equal(options.args[1]);
         expect(Array.isArray(container.envFrom)).to.equal(true);

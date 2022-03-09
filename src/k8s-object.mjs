@@ -160,8 +160,9 @@ class K8sObject {
 
                 this._runTransform(value, (field, value) => {
                     subject[field] = this._k8sClientObject(field, value[field]);
-                }, ['args']);
+                }, ['command', 'args']);
 
+                subject['command'] = this._k8sClientObject('type:array', value['command']);
                 subject['args'] = this._k8sClientObject('type:array', value['args']);
 
                 return subject;
@@ -169,7 +170,7 @@ class K8sObject {
             case 'type:array': {
                 let vals = []
 
-                if ((typeof value === 'string') && value.includes(' ')) {
+                if ((typeof value === 'string')) {
                     vals = value.split(' ');
                 } else {
                     vals = value;
