@@ -16,7 +16,7 @@ describe('k8s-tag', () => {
             namespace: 'default',
             schedule: '* * * * *',
             image: 'busybox:latest',
-            command: ['ls'],
+            command: 'ls',
             args: ['something', 'else']
         };
 
@@ -35,7 +35,7 @@ describe('k8s-tag', () => {
                                 containers:
                                     - name: "${process.env.HELM_RELEASE_NAME}-data-collector"
                                       image: "${options.image}"
-                                      command: "${options.command}"
+                                      command: ["${options.command}"]
                                       args:
                                         ${options.args.map((arg) => `
                                         - ${arg}`)}
@@ -226,17 +226,50 @@ describe('k8s-tag', () => {
 
     it('should correctly map kind secret to a k8s client object', () => {
 
-        // const secret = k8s`
-        //     apiVersion: v1
-        //     kind: Secret
-        //     metadata:
-        //         name: secret-sa-sample
-        //         annotations:
-        //             kubernetes.io/service-account.name: "sa-name"
-        //     type: kubernetes.io/service-account-token
-        //     data:
-        //         extra: YmFyCg==
-        // `;
+        const subject = k8s`
+            apiVersion: v1
+            kind: Secret
+            metadata:
+                name: secret-sa-sample
+                annotations:
+                    kubernetes.io/service-account.name: "sa-name"
+            type: kubernetes.io/service-account-token
+            data:
+                extra: YmFyCg==
+        `;
+
+        const actual = subject._manifest._obj._obj;
+
+        expect(actual.constructor.name).to.include('Secret');
+        expect(actual.apiVersion).to.equal('v1');
+        expect(actual.kind).to.equal('Secret');
+        expect(actual.metadata.constructor.name).to.include('ObjectMeta');
+        expect(actual.metadata.name).to.equal('secret-sa-sample');
+        expect(actual.metadata.annotations['kubernetes.io/service-account.name']).to.equal('sa-name');
+        expect(actual.type).to.equal('kubernetes.io/service-account-token');
+        expect(actual.data.extra).to.equal('YmFyCg==');
+    })
+
+    it('should correctly map kind pod to a k8s client object', () => {
+
+        const subject = k8s`
+            apiVersion: v1
+            kind: Pod
+            metadata:
+                name: private-reg
+            spec:
+                containers:
+                    - name: private-reg-container
+                      image: <your-private-image>
+                imagePullSecrets:
+                    - name: regcred
+        `;
+
+        const actual = subject._manifest._obj._obj;
+
+        expect(actual.constructor.name).to.include('Pod');
+        expect(actual.apiVersion).to.equal('v1');
+        expect(actual.kind).to.equal('Pod');
     })
 
 })
