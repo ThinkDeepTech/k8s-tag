@@ -20,7 +20,7 @@ class K8sManifest {
     }
 
     toString() {
-        return yaml.stringify(this._yaml);
+        return this._obj.toString();
     }
 }
 
