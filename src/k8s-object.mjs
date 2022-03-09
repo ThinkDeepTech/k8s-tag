@@ -124,6 +124,25 @@ class K8sObject {
 
                 return subject;
             }
+            case 'imagepullsecrets': {
+
+                let vals = [];
+                for (const obj of value) {
+                    vals.push(this._k8sClientObject('localobjectreference', obj));
+                }
+
+                return vals;
+            }
+            case 'localobjectreference': {
+
+                const subject = new k8s.V1LocalObjectReference();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                });
+
+                return subject;
+            }
             case 'containers': {
 
                 console.log(`Creating containers`);

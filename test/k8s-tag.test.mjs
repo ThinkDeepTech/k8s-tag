@@ -190,6 +190,8 @@ describe('k8s-tag', () => {
                                 ` : ``}
                         serviceAccountName: "${process.env.HELM_RELEASE_NAME}-secret-accessor-service-account"
                         restartPolicy: "Never"
+                        imagePullSecrets:
+                            - name: "docker-secret"
         `;
 
         const actual = job._manifest._obj._obj;
@@ -203,6 +205,10 @@ describe('k8s-tag', () => {
         expect(actual.spec.template.constructor.name).to.include('PodTemplateSpec');
         expect(actual.spec.template.spec.constructor.name).to.include('PodSpec');
         expect(Array.isArray(actual.spec.template.spec.containers)).to.equal(true);
+
+        expect(Array.isArray(actual.spec.template.spec.imagePullSecrets)).to.equal(true);
+        expect(actual.spec.template.spec.imagePullSecrets[0].constructor.name).to.include('LocalObjectReference');
+        expect(actual.spec.template.spec.imagePullSecrets[0].name).to.equal('docker-secret');
 
         const container = actual.spec.template.spec.containers[0];
         expect(container.constructor.name).to.include('Container');
@@ -218,6 +224,19 @@ describe('k8s-tag', () => {
         expect(container.envFrom[1].secretRef.name).to.equal(`${process.env.PREDECOS_KAFKA_SECRET}`);
     })
 
+    it('should correctly map kind secret to a k8s client object', () => {
 
+        // const secret = k8s`
+        //     apiVersion: v1
+        //     kind: Secret
+        //     metadata:
+        //         name: secret-sa-sample
+        //         annotations:
+        //             kubernetes.io/service-account.name: "sa-name"
+        //     type: kubernetes.io/service-account-token
+        //     data:
+        //         extra: YmFyCg==
+        // `;
+    })
 
 })
