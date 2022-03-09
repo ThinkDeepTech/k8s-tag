@@ -24,6 +24,10 @@ class K8sApi {
                 console.log(`Using cron job creation strategy for ${JSON.stringify(manifest.metadata())} \n ${JSON.stringify(manifest.object())}`)
                 return this._api.createNamespacedCronJob.bind(this._api, manifest.metadata().namespace, manifest.object());
             }
+            case 'Job': {
+                console.log(`Using job creation strategy for ${JSON.stringify(manifest.metadata())} \n ${JSON.stringify(manifest.object())}`)
+                return this._api.createNamespacedJob.bind(this._api, manifest.metadata().namespace, manifest.object());
+            }
             default: {
                 throw new Error(`K8s manifest kind not recognized. Received: ${manifest.kind()}`);
             }
@@ -34,6 +38,9 @@ class K8sApi {
         switch(manifest.kind()) {
             case 'CronJob': {
                 return this._api.deleteNamespacedCronJob.bind(this._api, manifest.metadata().name, manifest.metadata().namespace);
+            }
+            case 'Job': {
+                return this._api.deleteNamespacedJob.bind(this._api, manifest.metadata().name, manifest.metadata().namespace);
             }
             default: {
                 throw new Error(`K8s manifest kind not recognized. Received: ${manifest.kind()}`);
