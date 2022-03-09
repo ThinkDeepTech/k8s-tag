@@ -133,9 +133,22 @@ class K8sObject {
 
                 this._runTransform(obj, (field, obj) => {
                     subject[field] = this._value(field, obj[field]);
-                });
+                }, ['args']);
+
+                subject['args'] = this._k8sClientObject('type:array', obj['args']);
 
                 return subject;
+            }
+            case 'type:array': {
+                let vals = []
+
+                if ((typeof obj === 'string') && obj.includes(' ')) {
+                    vals = obj.split(' ');
+                } else {
+                    vals = obj;
+                }
+
+                return vals;
             }
             case 'envfrom': {
 
