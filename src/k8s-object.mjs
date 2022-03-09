@@ -24,7 +24,7 @@ class K8sObject {
 
     _k8sClientObject(key, value) {
 
-        if (typeof value === 'string' && !key.includes('array'))
+        if ((typeof value !== 'object') && !(Array.isArray(value)) && !key.includes('array'))
             return value;
 
         switch(key.toLowerCase()) {
@@ -64,6 +64,17 @@ class K8sObject {
 
                 return subject;
             }
+            case 'service': {
+                const subject = new k8s.V1Service();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                }, ['spec']);
+
+                subject.spec = this._k8sClientObject('service:spec', value['spec']);
+
+                return subject;
+            }
             case 'secret': {
                 const subject = new k8s.V1Secret();
 
@@ -95,9 +106,47 @@ class K8sObject {
 
                 return subject;
             }
+            case 'service:spec': {
+                const subject = new k8s.V1ServiceSpec();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                }, ['ports']);
+
+                subject['ports'] = this._k8sClientObject('service:ports', value['ports']);
+
+                return subject;
+            }
+            case 'service:ports': {
+                let vals = [];
+
+                for (const field in value) {
+                    vals.push(this._k8sClientObject('service:port', value[field]));
+                }
+
+                return vals;
+            }
+            case 'service:port': {
+                const subject = new k8s.V1ServicePort();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                });
+
+                return subject;
+            }
             case 'metadata': {
 
                 const subject = new k8s.V1ObjectMeta();
+
+                for (const field in value) {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                }
+
+                return subject;
+            }
+            case 'selector': {
+                let subject = {};
 
                 for (const field in value) {
                     subject[field] = this._k8sClientObject(field, value[field]);
