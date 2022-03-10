@@ -24,6 +24,10 @@ class K8sObject {
 
     _k8sClientObject(key, value) {
 
+        console.log(`Processing key: ${key}`);
+
+        if (!value) return value;
+
         if ((typeof value !== 'object') && !(Array.isArray(value)) && !key.includes('array'))
             return value;
 
@@ -230,13 +234,38 @@ class K8sObject {
 
                 return subject;
             }
+            case 'creationtimestamp': {
+
+            }
             case 'metadata': {
 
                 const subject = new k8s.V1ObjectMeta();
 
-                for (const field in value) {
+                this._runTransform(value, (field, value) => {
                     subject[field] = this._k8sClientObject(field, value[field]);
+                }, ['labels', 'finalizers', 'managedFields']);
+
+                subject.labels = this._k8sClientObject('type:map', value['labels']);
+                subject.finalizers = this._k8sClientObject('type:array', value['finalizers']);
+                subject.managedFields = this._k8sClientObject('metadata:managed:fields', value['managedFields']);
+
+                return subject;
+            }
+            case 'metadata:managed:fields': {
+                let vars = [];
+
+                for (const entry of value) {
+                    vars.push(this._k8sClientObject('metadata:managed:field', entry));
                 }
+
+                return vars;
+            }
+            case 'metadata:managed:field': {
+                const subject = new k8s.V1ManagedFieldsEntry();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                });
 
                 return subject;
             }
@@ -375,6 +404,19 @@ class K8sObject {
                 }
 
                 return vals;
+            }
+            case 'configmapref': {
+
+                const subject = new k8s.V1EnvFromSource();
+                const configMap = new k8s.V1ConfigMapEnvSource();
+
+                this._runTransform(value, (field, value) => {
+                    configMap[field] = this._k8sClientObject(field, value[field]);
+                });
+
+                subject.configMapRef = configMap;
+
+                return subject;
             }
             case 'secretref': {
 
