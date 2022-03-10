@@ -8,12 +8,10 @@ class K8sApi {
     }
 
     async create(manifest) {
-        console.log(`Creating: ${manifest.toString()}`);
         return this._creationStrategy(manifest)();
     }
 
     async delete(manifest) {
-        console.log(`Deleting: ${manifest.toString()}`);
         return this._deletionStrategy(manifest)();
     }
 
@@ -35,6 +33,14 @@ class K8sApi {
             case 'Secret': {
                 console.log(`Using secret creation strategy for \n${manifest.toString()}\n`);
                 return this._api.createNamespacedSecret.bind(this._api, manifest.metadata().namespace, manifest.object());
+            }
+            case 'Service': {
+                console.log(`Using service creation strategy for \n${manifest.toString()}\n`);
+                return this._api.createNamespacedService.bind(this._api, manifest.metadata().namespace, manifest.object());
+            }
+            case 'Deployment': {
+                console.log(`Using deployment creation strategy for \n${manifest.toString()}\n`);
+                return this._api.createNamespacedDeployment.bind(this._api, manifest.metadata().namespace, manifest.object());
             }
             default: {
                 throw new Error(`K8s manifest kind not recognized. Received: ${manifest.kind()}`);
@@ -61,6 +67,14 @@ class K8sApi {
                 console.log(`Using secret deletion strategy for \n${manifest.toString()}\n`);
                 return this._api.deleteNamespacedSecret.bind(this._api, manifest.metadata().name, manifest.metadata().namespace);
             }
+            case 'Service': {
+                console.log(`Using service deletion strategy for \n${manifest.toString()}\n`);
+                return this._api.deleteNamespacedService.bind(this._api, manifest.metadata().name, manifest.metadata().namespace);
+            }
+            case 'Deployment': {
+                console.log(`Using deployment deletion strategy for \n${manifest.toString()}\n`);
+                return this._api.deleteNamespacedDeployment.bind(this._api, manifest.metadata().name, manifest.metadata().namespace);
+            }
             default: {
                 throw new Error(`K8s manifest kind not recognized. Received: ${manifest.kind()}`);
             }
@@ -71,6 +85,9 @@ class K8sApi {
 
         const apiVersion = parsedYaml.apiVersion.toLowerCase();
         switch(apiVersion) {
+            case "apps/v1": {
+                return this._kubeConfig.makeApiClient(k8s.AppsV1Api);
+            }
             case "batch/v1": {
                 return this._kubeConfig.makeApiClient(k8s.BatchV1Api);
             }

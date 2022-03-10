@@ -75,6 +75,18 @@ class K8sObject {
 
                 return subject;
             }
+            case 'deployment': {
+                const subject = new k8s.V1Deployment();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                }, ['spec', 'status']);
+
+                subject.spec = this._k8sClientObject('deployment:spec', value['spec']);
+                subject.status = this._k8sClientObject('deployment:status', value['status']);
+
+                return subject;
+            }
             case 'secret': {
                 const subject = new k8s.V1Secret();
 
@@ -86,7 +98,7 @@ class K8sObject {
             }
             case 'data': {
 
-                const subject = {};
+                let subject = {};
 
                 this._runTransform(value, (field, value) => {
                     subject[field] = this._k8sClientObject(field, value[field]);
@@ -114,6 +126,89 @@ class K8sObject {
                 }, ['ports']);
 
                 subject['ports'] = this._k8sClientObject('service:ports', value['ports']);
+
+                return subject;
+            }
+            case 'deployment:spec': {
+                const subject = new k8s.V1DeploymentSpec();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                }, ['selector', 'template', 'strategy']);
+
+                subject['selector'] = this._k8sClientObject('label:selector', value['selector']);
+                subject['strategy'] = this._k8sClientObject('deployment:strategy', value['strategy']);
+                subject['template'] = this._k8sClientObject('pod:template', value['template']);
+
+                return subject;
+            }
+            case 'deployment:status': {
+                const subject = new k8s.V1DeploymentStatus();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                }, ['conditions']);
+
+                subject.conditions = this._k8sClientObject('deployment:conditions', value['conditions'])
+
+                return subject;
+            }
+            case 'deployment:conditions': {
+                let vars = [];
+
+                for (const entry of value) {
+                    vars.push(this._k8sClientObject('deployment:condition', entry));
+                }
+
+                return vars;
+            }
+            case 'deployment:condition': {
+
+                const subject = new k8s.V1DeploymentCondition();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                });
+
+                return subject;
+            }
+            case 'deployment:strategy': {
+                const subject = new k8s.V1DeploymentStrategy();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                }, ['rollingUpdate']);
+
+                subject['rollingUpdate'] = this._k8sClientObject('deployment:rolling:update', value['rollingUpdate']);
+
+                return subject;
+            }
+            case 'deployment:rolling:update': {
+                const subject = new k8s.V1RollingUpdateDeployment();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                });
+
+                return subject;
+            }
+            case 'label:selector': {
+                const subject = new k8s.V1LabelSelector();
+
+                subject['matchExpressions'] = this._k8sClientObject('label:selector:requirement', value['matchExpressions']);
+                subject['matchLabels'] = this._k8sClientObject('type:map', value['matchLabels']);
+
+                return subject;
+            }
+            case 'label:selector:requirement': {
+
+                const subject = new k8s.V1LabelSelectorRequirement();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                }, ['values']);
+
+                subject['values'] = this._k8sClientObject('type:array', values['values']);
 
                 return subject;
             }
@@ -248,6 +343,15 @@ class K8sObject {
 
                 subject['command'] = this._k8sClientObject('type:array', value['command']);
                 subject['args'] = this._k8sClientObject('type:array', value['args']);
+
+                return subject;
+            }
+            case 'type:map': {
+                let subject = {};
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                });
 
                 return subject;
             }
