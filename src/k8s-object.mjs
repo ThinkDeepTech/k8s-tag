@@ -366,12 +366,87 @@ class K8sObject {
 
                 const subject = new k8s.V1Container();
 
+                // TODO: Add more support for container objects.
+
                 this._runTransform(value, (field, value) => {
                     subject[field] = this._k8sClientObject(field, value[field]);
-                }, ['command', 'args']);
+                }, ['command', 'args', 'ports']);
 
+                subject['ports'] = this._k8sClientObject('container:port', value['ports']);
                 subject['command'] = this._k8sClientObject('type:array', value['command']);
                 subject['args'] = this._k8sClientObject('type:array', value['args']);
+
+                return subject;
+            }
+            case 'env': {
+                const subject = new k8s.V1EnvVar();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                });
+
+                return subject;
+            }
+            case 'valuefrom': {
+                const subject = new k8s.V1EnvVarSource();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                });
+
+                return subject;
+            }
+            case 'secretkeyref': {
+                const subject = new k8s.V1SecretKeySelector();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                });
+
+                return subject;
+            }
+            case 'resourcefieldref': {
+                const subject = new k8s.V1ResourceFieldSelector();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                });
+
+                return subject;
+            }
+            case 'fieldref': {
+                const subject = new k8s.V1ObjectFieldSelector();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                });
+
+                return subject;
+            }
+            case 'configmapkeyref': {
+                const subject = new k8s.V1ConfigMapKeySelector();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                });
+
+                return subject;
+            }
+            case 'container:ports': {
+                let vars = [];
+
+                for (const entry of value) {
+                    vars.push(this._k8sClientObject('container:port', entry));
+                }
+
+                return vars;
+            }
+            case 'container:port': {
+                const subject = new k8s.V1ContainerPort();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                });
 
                 return subject;
             }
