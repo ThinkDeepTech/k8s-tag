@@ -18,22 +18,22 @@ class K8sApi {
     }
 
     _creationStrategy(manifest) {
-        console.log('Fetching creation strategy');
+
         switch(manifest.kind()) {
             case 'CronJob': {
-                console.log(`Using cron job creation strategy for ${JSON.stringify(manifest.metadata())} \n ${JSON.stringify(manifest.object())}`)
+                console.log(`Using cron job creation strategy for \n${manifest.toString()}\n`);
                 return this._api.createNamespacedCronJob.bind(this._api, manifest.metadata().namespace, manifest.object());
             }
             case 'Job': {
-                console.log(`Using job creation strategy for ${JSON.stringify(manifest.metadata())} \n ${JSON.stringify(manifest.object())}`)
+                console.log(`Using job creation strategy for \n${manifest.toString()}\n`);
                 return this._api.createNamespacedJob.bind(this._api, manifest.metadata().namespace, manifest.object());
             }
             case 'Pod': {
-                console.log(`Using pod creation strategy for ${JSON.stringify(manifest.metadata())} \n ${JSON.stringify(manifest.object())}`)
+                console.log(`Using pod creation strategy for \n${manifest.toString()}\n`);
                 return this._api.createNamespacedPod.bind(this._api, manifest.metadata().namespace, manifest.object());
             }
             case 'Secret': {
-                console.log(`Using secret creation strategy for ${JSON.stringify(manifest.metadata())} \n ${JSON.stringify(manifest.object())}`)
+                console.log(`Using secret creation strategy for \n${manifest.toString()}\n`);
                 return this._api.createNamespacedSecret.bind(this._api, manifest.metadata().namespace, manifest.object());
             }
             default: {
@@ -43,21 +43,22 @@ class K8sApi {
     }
 
     _deletionStrategy(manifest) {
+
         switch(manifest.kind()) {
             case 'CronJob': {
-                console.info(`Using cron job deletion strategy: name ${manifest.metadata().name}, namespace ${manifest.metadata().namespace}`);
+                console.log(`Using cron job deletion strategy for \n${manifest.toString()}\n`);
                 return this._api.deleteNamespacedCronJob.bind(this._api, manifest.metadata().name, manifest.metadata().namespace);
             }
             case 'Job': {
-                console.info(`Using job deletion strategy: name ${manifest.metadata().name}, namespace ${manifest.metadata().namespace}`);
+                console.log(`Using job deletion strategy for \n${manifest.toString()}\n`);
                 return this._api.deleteNamespacedJob.bind(this._api, manifest.metadata().name, manifest.metadata().namespace);
             }
             case 'Pod': {
-                console.info(`Using pod deletion strategy: name ${manifest.metadata().name}, namespace ${manifest.metadata().namespace}`);
+                console.log(`Using pod deletion strategy for \n${manifest.toString()}\n`);
                 return this._api.deleteNamespacedPod.bind(this._api, manifest.metadata().name, manifest.metadata().namespace);
             }
             case 'Secret': {
-                console.info(`Using secret deletion strategy: name ${manifest.metadata().name}, namespace ${manifest.metadata().namespace}`);
+                console.log(`Using secret deletion strategy for \n${manifest.toString()}\n`);
                 return this._api.deleteNamespacedSecret.bind(this._api, manifest.metadata().name, manifest.metadata().namespace);
             }
             default: {

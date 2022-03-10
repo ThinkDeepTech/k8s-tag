@@ -240,6 +240,9 @@ describe('k8s-tag', () => {
 
         const actual = subject._manifest._obj._obj;
 
+
+        console.log(`${subject.toString()}`);
+
         expect(actual.constructor.name).to.include('Secret');
         expect(actual.apiVersion).to.equal('v1');
         expect(actual.kind).to.equal('Secret');
