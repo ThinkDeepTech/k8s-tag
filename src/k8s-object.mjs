@@ -378,6 +378,57 @@ class K8sObject {
 
                 return subject;
             }
+            case 'lifecycle': {
+                const subject = new k8s.V1Lifecycle();
+
+                subject['postStart'] = this._k8sClientObject('handler', value['postStart']);
+                subject['preStop'] = this._k8sClientObject('handler', value['preStop']);
+
+                return subject;
+            }
+            case 'handler': {
+                const subject = new k8s.V1Handler();
+
+                subject.exec = this._k8sClientObject('exec:action', value['exec']);
+                subject.httpGet = this._k8sClientObject('http:get:action', value['httpGet']);
+                subject.tcpSocket = this._k8sClientObject('tcp:socket:action', value['tcpSocket']);
+
+                return subject;
+            }
+            case 'http:get:action': {
+                const subject = new k8s.V1HTTPGetAction();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                });
+
+                return subject;
+            }
+            case 'httpheaders': {
+                let vals = [];
+
+                for (const entry of value) {
+                    vals.push(this._k8sClientObject('httpheader', entry));
+                }
+
+                return vals;
+            }
+            case 'httpheader': {
+                const subject = new k8s.V1HTTPHeader();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                });
+
+                return subject;
+            }
+            case 'exec:action': {
+                const subject = new k8s.V1ExecAction();
+
+                subject.command = this._k8sClientObject('type:array', value['command']);
+
+                return subject;
+            }
             case 'env': {
                 const subject = new k8s.V1EnvVar();
 
