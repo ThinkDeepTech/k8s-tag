@@ -240,6 +240,9 @@ describe('k8s-tag', () => {
 
         const actual = subject._manifest._obj._obj;
 
+
+        console.log(`${subject.toString()}`);
+
         expect(actual.constructor.name).to.include('Secret');
         expect(actual.apiVersion).to.equal('v1');
         expect(actual.kind).to.equal('Secret');
@@ -272,4 +275,33 @@ describe('k8s-tag', () => {
         expect(actual.kind).to.equal('Pod');
     })
 
+    it('should correctly map kind service to a k8s client object', () => {
+
+        const subject = k8s`
+        apiVersion: v1
+        kind: Service
+        metadata:
+            name: my-service
+        spec:
+            selector:
+                app: MyApp
+            ports:
+                - protocol: TCP
+                  port: 80
+                  targetPort: 9376
+        `;
+
+        const actual = subject._manifest._obj._obj;
+
+        expect(actual.constructor.name).to.include('Service');
+        expect(actual.apiVersion).to.equal('v1');
+        expect(actual.kind).to.equal('Service');
+        expect(actual.spec.constructor.name).to.include('ServiceSpec');
+        expect(actual.spec.selector.app).to.equal('MyApp');
+        expect(Array.isArray(actual.spec.ports)).to.equal(true);
+        expect(actual.spec.ports[0].constructor.name).to.include('ServicePort');
+        expect(actual.spec.ports[0].protocol).to.equal('TCP');
+        expect(actual.spec.ports[0].port).to.equal(80);
+        expect(actual.spec.ports[0].targetPort).to.equal(9376);
+    })
 })
