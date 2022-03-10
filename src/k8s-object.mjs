@@ -73,9 +73,10 @@ class K8sObject {
 
                 this._runTransform(value, (field, value) => {
                     subject[field] = this._k8sClientObject(field, value[field]);
-                }, ['spec']);
+                }, ['spec', 'status']);
 
                 subject.spec = this._k8sClientObject('service:spec', value['spec']);
+                subject.status = this._k8sClientObject('service:status', value['status']);
 
                 return subject;
             }
@@ -127,9 +128,102 @@ class K8sObject {
 
                 this._runTransform(value, (field, value) => {
                     subject[field] = this._k8sClientObject(field, value[field]);
+                }, [
+                    'ports', 'clusterIPs', 'externalIPs', 'ipFamilies', 'loadBalancerSourceRanges', 'topologyKeys',
+                    'selector'
+                ]);
+
+                subject['clusterIPs'] = this._k8sClientObject('type:array', value['clusterIPs']);
+                subject['externalIPs'] = this._k8sClientObject('type:array', value['externalIPs']);
+                subject['ipFamilies'] = this._k8sClientObject('type:array', value['ipFamilies']);
+                subject['loadBalancerSourceRanges'] = this._k8sClientObject('type:array', value['loadBalancerSourceRanges']);
+                subject['selector'] = this._k8sClientObject('type:map', value['selector']);
+                subject['sessionAffinityConfig'] =
+                subject['topologyKeys'] = this._k8sClientObject('type:array', value['topologyKeys']);
+                subject['ports'] = this._k8sClientObject('service:ports', value['ports']);
+
+                return subject;
+            }
+            case 'sessionaffinityconfig': {
+                const subject = new k8s.V1SessionAffinityConfig();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                });
+
+                return subject;
+            }
+            case 'clientip': {
+                const subject = new k8s.V1ClientIPConfig();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                });
+
+                return subject;
+            }
+            case 'service:status': {
+                const subject = new k8s.V1ServiceStatus();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                }, ['loadBalancer']);
+
+                subject.loadBalancer = this._k8sClientObject('load:balancer:status', value['loadBalancer']);
+
+                return subject;
+            }
+            case 'load:balancer:status': {
+                const subject = new k8s.V1LoadBalancerStatus();
+
+                subject.ingress = this._k8sClientObject('load:balancer:ingress', value['ingress']);
+
+                return subject;
+            }
+            case 'load:balancer:ingress': {
+                const subject = new k8s.V1LoadBalancerIngress();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
                 }, ['ports']);
 
-                subject['ports'] = this._k8sClientObject('service:ports', value['ports']);
+                subject.ports = this._k8sClientObject('ports:status', value['ports']);
+
+                return subject;
+            }
+            case 'ports:status': {
+                let vals = [];
+
+                for (const entry of value) {
+                    vals.push(this._k8sClientObject('port:status', entry));
+                }
+
+                return vals;
+            }
+            case 'port:status': {
+                const subject = new k8s.V1PortStatus();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                });
+
+                return subject;
+            }
+            case 'conditions': {
+                const vals = [];
+
+                for (const entry of value) {
+                    vals.push(this._k8sClientObject('condition', entry));
+                }
+
+                return vals;
+            }
+            case 'condition': {
+                const subject = new k8s.V1Condition();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                });
 
                 return subject;
             }

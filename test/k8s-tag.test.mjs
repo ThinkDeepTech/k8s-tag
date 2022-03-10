@@ -274,19 +274,37 @@ describe('k8s-tag', () => {
 
     it('should correctly map kind service to a k8s client object', () => {
 
-        // TODO: with more realistic example
         const subject = k8s`
         apiVersion: v1
         kind: Service
         metadata:
-            name: my-service
+          annotations:
+            meta.helm.sh/release-name: v1
+            meta.helm.sh/release-namespace: development
+          creationTimestamp: "2022-03-08T15:46:18Z"
+          labels:
+            app.kubernetes.io/managed-by: Helm
+          name: v1-deep-microservice-collection-service
+          namespace: development
+          resourceVersion: "9930598"
+          uid: 091a8fd6-23a4-4c64-815b-15eebc3853a9
         spec:
-            selector:
-                app: MyApp
-            ports:
-                - protocol: TCP
-                  port: 80
-                  targetPort: 9376
+          clusterIP: 10.245.63.199
+          clusterIPs:
+          - 10.245.63.199
+          ipFamilies:
+          - IPv4
+          ipFamilyPolicy: SingleStack
+          ports:
+          - port: 4002
+            protocol: TCP
+            targetPort: 4002
+          selector:
+            app: MyApp
+          sessionAffinity: None
+          type: ClusterIP
+        status:
+          loadBalancer: {}
         `;
 
         const actual = subject._manifest._obj._obj;
@@ -299,11 +317,11 @@ describe('k8s-tag', () => {
         expect(Array.isArray(actual.spec.ports)).to.equal(true);
         expect(actual.spec.ports[0].constructor.name).to.include('ServicePort');
         expect(actual.spec.ports[0].protocol).to.equal('TCP');
-        expect(actual.spec.ports[0].port).to.equal(80);
-        expect(actual.spec.ports[0].targetPort).to.equal(9376);
+        expect(actual.spec.ports[0].port).to.equal(4002);
+        expect(actual.spec.ports[0].targetPort).to.equal(4002);
     })
 
-    it.only('should correctly map kind deployment to a k8s client object', () => {
+    it('should correctly map kind deployment to a k8s client object', () => {
 
         const options = {
             appLabel: 'some-application',
