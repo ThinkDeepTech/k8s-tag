@@ -366,15 +366,104 @@ class K8sObject {
 
                 const subject = new k8s.V1Container();
 
-                // TODO: Add more support for container objects.
-
                 this._runTransform(value, (field, value) => {
                     subject[field] = this._k8sClientObject(field, value[field]);
-                }, ['command', 'args', 'ports']);
+                }, ['command', 'args', 'ports', 'livenessProbe', 'readinessProbe', 'startupProbe']);
 
+                subject['startupProbe'] = this._k8sClientObject('probe', value['startupProbe']);
+                subject['readinessProbe'] = this._k8sClientObject('probe', value['readinessProbe']);
+                subject['livenessProbe'] = this._k8sClientObject('probe', value['livenessProbe']);
                 subject['ports'] = this._k8sClientObject('container:port', value['ports']);
                 subject['command'] = this._k8sClientObject('type:array', value['command']);
                 subject['args'] = this._k8sClientObject('type:array', value['args']);
+
+                return subject;
+            }
+            case 'volumemounts': {
+                let vals = [];
+
+                for (const entry of value) {
+                    vals.push(this._k8sClientObject('volumemount', entry));
+                }
+
+                return vals;
+            }
+            case 'volumemount': {
+                const subject = new k8s.V1VolumeMount();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                });
+
+                return subject;
+            }
+            case 'volumedevices': {
+                let vals = [];
+
+                for (const entry of value) {
+                    vals.push(this._k8sClientObject('volumedevice', entry));
+                }
+
+                return vals;
+            }
+            case 'volumedevice': {
+                const subject = new k8s.V1VolumeDevice();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                });
+
+                return subject;
+            }
+            case 'securitycontext': {
+                const subject = new k8s.V1SecurityContext();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                });
+
+                return subject;
+            }
+            case 'windowsoptions': {
+                const subject = new k8s.V1WindowsSecurityContextOptions();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                });
+
+                return subject;
+            }
+            case 'seccompprofile': {
+                const subject = new k8s.V1SeccompProfile();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                });
+
+                return subject;
+            }
+            case 'selinuxoptions': {
+                const subject = new k8s.V1SELinuxOptions();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                });
+
+                return subject;
+            }
+            case 'capabilities': {
+                const subject = new k8s.V1Capabilities();
+
+                subject.add = this._k8sClientObject('type:array', value['add']);
+                subject.drop = this._k8sClientObject('type:array', value['drop']);
+
+                return subject;
+            }
+            case 'resources': {
+                const subject = new k8s.V1ResourceRequirements();
+
+                subject.limits = this._k8sClientObject('type:map', value['limits']);
+                subject.requests = this._k8sClientObject('type:map', value['requests']);
 
                 return subject;
             }
