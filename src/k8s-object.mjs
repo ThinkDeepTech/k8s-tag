@@ -37,8 +37,8 @@ class K8sObject {
                 console.log(`Creating cron job`);
                 const subject = new k8s.V1CronJob();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 }, ['spec']);
 
                 subject.spec = this._k8sClientObject('cronjob:spec', value['spec']);
@@ -49,8 +49,8 @@ class K8sObject {
 
                 const subject = new k8s.V1Job();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 }, ['spec']);
 
                 subject.spec = this._k8sClientObject('job:spec', value['spec']);
@@ -60,8 +60,8 @@ class K8sObject {
             case 'pod': {
                 const subject = new k8s.V1Pod();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 }, ['spec']);
 
                 subject.spec = this._k8sClientObject('pod:spec', value['spec']);
@@ -71,8 +71,8 @@ class K8sObject {
             case 'service': {
                 const subject = new k8s.V1Service();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 }, ['spec', 'status']);
 
                 subject.spec = this._k8sClientObject('service:spec', value['spec']);
@@ -83,8 +83,8 @@ class K8sObject {
             case 'deployment': {
                 const subject = new k8s.V1Deployment();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 }, ['spec', 'status']);
 
                 subject.spec = this._k8sClientObject('deployment:spec', value['spec']);
@@ -95,8 +95,8 @@ class K8sObject {
             case 'secret': {
                 const subject = new k8s.V1Secret();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -105,8 +105,8 @@ class K8sObject {
 
                 let subject = {};
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -115,8 +115,8 @@ class K8sObject {
 
                 const subject = new k8s.V1CronJobSpec();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 }, ['jobTemplate']);
 
                 subject.jobTemplate = this._k8sClientObject('job:template', value['jobTemplate']);
@@ -126,8 +126,8 @@ class K8sObject {
             case 'service:spec': {
                 const subject = new k8s.V1ServiceSpec();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 }, [
                     'ports', 'clusterIPs', 'externalIPs', 'ipFamilies', 'loadBalancerSourceRanges', 'topologyKeys',
                     'selector'
@@ -147,8 +147,8 @@ class K8sObject {
             case 'sessionaffinityconfig': {
                 const subject = new k8s.V1SessionAffinityConfig();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -156,8 +156,8 @@ class K8sObject {
             case 'clientip': {
                 const subject = new k8s.V1ClientIPConfig();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -165,8 +165,8 @@ class K8sObject {
             case 'service:status': {
                 const subject = new k8s.V1ServiceStatus();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 }, ['loadBalancer']);
 
                 subject.loadBalancer = this._k8sClientObject('load:balancer:status', value['loadBalancer']);
@@ -183,8 +183,8 @@ class K8sObject {
             case 'load:balancer:ingress': {
                 const subject = new k8s.V1LoadBalancerIngress();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 }, ['ports']);
 
                 subject.ports = this._k8sClientObject('ports:status', value['ports']);
@@ -203,8 +203,8 @@ class K8sObject {
             case 'port:status': {
                 const subject = new k8s.V1PortStatus();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -221,8 +221,8 @@ class K8sObject {
             case 'condition': {
                 const subject = new k8s.V1Condition();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -230,8 +230,8 @@ class K8sObject {
             case 'deployment:spec': {
                 const subject = new k8s.V1DeploymentSpec();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 }, ['selector', 'template', 'strategy']);
 
                 subject['selector'] = this._k8sClientObject('label:selector', value['selector']);
@@ -243,8 +243,8 @@ class K8sObject {
             case 'deployment:status': {
                 const subject = new k8s.V1DeploymentStatus();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 }, ['conditions']);
 
                 subject.conditions = this._k8sClientObject('deployment:conditions', value['conditions'])
@@ -264,8 +264,8 @@ class K8sObject {
 
                 const subject = new k8s.V1DeploymentCondition();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -273,8 +273,8 @@ class K8sObject {
             case 'deployment:strategy': {
                 const subject = new k8s.V1DeploymentStrategy();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 }, ['rollingUpdate']);
 
                 subject['rollingUpdate'] = this._k8sClientObject('deployment:rolling:update', value['rollingUpdate']);
@@ -284,8 +284,8 @@ class K8sObject {
             case 'deployment:rolling:update': {
                 const subject = new k8s.V1RollingUpdateDeployment();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -302,8 +302,8 @@ class K8sObject {
 
                 const subject = new k8s.V1LabelSelectorRequirement();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 }, ['values']);
 
                 subject['values'] = this._k8sClientObject('type:array', values['values']);
@@ -322,8 +322,8 @@ class K8sObject {
             case 'service:port': {
                 const subject = new k8s.V1ServicePort();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -332,8 +332,8 @@ class K8sObject {
 
                 const subject = new k8s.V1ObjectMeta();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 }, ['labels', 'finalizers', 'managedFields']);
 
                 subject.labels = this._k8sClientObject('type:map', value['labels']);
@@ -354,8 +354,8 @@ class K8sObject {
             case 'metadata:managed:field': {
                 const subject = new k8s.V1ManagedFieldsEntry();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -383,8 +383,8 @@ class K8sObject {
 
                 const subject = new k8s.V1JobTemplateSpec();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 }, ['spec']);
 
                 subject.spec = this._k8sClientObject('job:spec', value['spec']);
@@ -395,8 +395,8 @@ class K8sObject {
 
                 const subject = new k8s.V1JobSpec();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 }, ['template']);
 
                 subject.template = this._k8sClientObject('pod:template', value['template']);
@@ -407,8 +407,8 @@ class K8sObject {
 
                 const subject = new k8s.V1PodTemplateSpec();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 }, ['spec']);
 
                 subject.spec = this._k8sClientObject('pod:spec', value['spec']);
@@ -419,8 +419,8 @@ class K8sObject {
 
                 const subject = new k8s.V1PodSpec();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -438,8 +438,8 @@ class K8sObject {
 
                 const subject = new k8s.V1LocalObjectReference();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -457,8 +457,8 @@ class K8sObject {
 
                 const subject = new k8s.V1Container();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 }, ['command', 'args', 'ports', 'livenessProbe', 'readinessProbe', 'startupProbe']);
 
                 subject['startupProbe'] = this._k8sClientObject('probe', value['startupProbe']);
@@ -482,8 +482,8 @@ class K8sObject {
             case 'volumemount': {
                 const subject = new k8s.V1VolumeMount();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -500,8 +500,8 @@ class K8sObject {
             case 'volumedevice': {
                 const subject = new k8s.V1VolumeDevice();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -509,8 +509,8 @@ class K8sObject {
             case 'securitycontext': {
                 const subject = new k8s.V1SecurityContext();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -518,8 +518,8 @@ class K8sObject {
             case 'windowsoptions': {
                 const subject = new k8s.V1WindowsSecurityContextOptions();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -527,8 +527,8 @@ class K8sObject {
             case 'seccompprofile': {
                 const subject = new k8s.V1SeccompProfile();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -536,8 +536,8 @@ class K8sObject {
             case 'selinuxoptions': {
                 const subject = new k8s.V1SELinuxOptions();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -561,8 +561,8 @@ class K8sObject {
             case 'probe': {
                 const subject = new k8s.V1Probe();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -578,8 +578,8 @@ class K8sObject {
             case 'handler': {
                 const subject = new k8s.V1Handler();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -587,8 +587,8 @@ class K8sObject {
             case 'tcpsocket': {
                 const subject = new k8s.V1TCPSocketAction();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -596,8 +596,8 @@ class K8sObject {
             case 'httpget': {
                 const subject = new k8s.V1HTTPGetAction();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -614,8 +614,8 @@ class K8sObject {
             case 'httpheader': {
                 const subject = new k8s.V1HTTPHeader();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -630,8 +630,8 @@ class K8sObject {
             case 'env': {
                 const subject = new k8s.V1EnvVar();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -639,8 +639,8 @@ class K8sObject {
             case 'valuefrom': {
                 const subject = new k8s.V1EnvVarSource();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -648,8 +648,8 @@ class K8sObject {
             case 'secretkeyref': {
                 const subject = new k8s.V1SecretKeySelector();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -657,8 +657,8 @@ class K8sObject {
             case 'resourcefieldref': {
                 const subject = new k8s.V1ResourceFieldSelector();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -666,8 +666,8 @@ class K8sObject {
             case 'fieldref': {
                 const subject = new k8s.V1ObjectFieldSelector();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -675,8 +675,8 @@ class K8sObject {
             case 'configmapkeyref': {
                 const subject = new k8s.V1ConfigMapKeySelector();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -693,8 +693,8 @@ class K8sObject {
             case 'container:port': {
                 const subject = new k8s.V1ContainerPort();
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -702,8 +702,8 @@ class K8sObject {
             case 'type:map': {
                 let subject = {};
 
-                this._runTransform(value, (field, value) => {
-                    subject[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
@@ -734,8 +734,8 @@ class K8sObject {
                 const subject = new k8s.V1EnvFromSource();
                 const configMap = new k8s.V1ConfigMapEnvSource();
 
-                this._runTransform(value, (field, value) => {
-                    configMap[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    configMap[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 subject.configMapRef = configMap;
@@ -747,8 +747,8 @@ class K8sObject {
                 const subject = new k8s.V1EnvFromSource();
                 const secretRef = new k8s.V1SecretEnvSource();
 
-                this._runTransform(value, (field, value) => {
-                    secretRef[field] = this._k8sClientObject(field, value[field]);
+                this._runTransform(value, (field, val) => {
+                    secretRef[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 subject.secretRef = secretRef;
