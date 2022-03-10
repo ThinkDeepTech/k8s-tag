@@ -378,6 +378,15 @@ class K8sObject {
 
                 return subject;
             }
+            case 'probe': {
+                const subject = new k8s.V1Probe();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                });
+
+                return subject;
+            }
             case 'lifecycle': {
                 const subject = new k8s.V1Lifecycle();
 
@@ -389,13 +398,22 @@ class K8sObject {
             case 'handler': {
                 const subject = new k8s.V1Handler();
 
-                subject.exec = this._k8sClientObject('exec:action', value['exec']);
-                subject.httpGet = this._k8sClientObject('http:get:action', value['httpGet']);
-                subject.tcpSocket = this._k8sClientObject('tcp:socket:action', value['tcpSocket']);
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                });
 
                 return subject;
             }
-            case 'http:get:action': {
+            case 'tcpsocket': {
+                const subject = new k8s.V1TCPSocketAction();
+
+                this._runTransform(value, (field, value) => {
+                    subject[field] = this._k8sClientObject(field, value[field]);
+                });
+
+                return subject;
+            }
+            case 'httpget': {
                 const subject = new k8s.V1HTTPGetAction();
 
                 this._runTransform(value, (field, value) => {
@@ -422,7 +440,7 @@ class K8sObject {
 
                 return subject;
             }
-            case 'exec:action': {
+            case 'exec': {
                 const subject = new k8s.V1ExecAction();
 
                 subject.command = this._k8sClientObject('type:array', value['command']);
