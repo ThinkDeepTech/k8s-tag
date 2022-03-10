@@ -393,6 +393,9 @@ describe('k8s-tag', () => {
             updatedReplicas: 1
         `;
 
-        const thing = 2;
+        const actual = subject._manifest._obj._obj;
+
+        expect(actual.constructor.name).to.include('Deployment');
+        expect(actual.spec.constructor.name).to.include('DeploymentSpec');
     })
 })

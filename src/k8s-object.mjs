@@ -373,7 +373,7 @@ class K8sObject {
                 subject['startupProbe'] = this._k8sClientObject('probe', value['startupProbe']);
                 subject['readinessProbe'] = this._k8sClientObject('probe', value['readinessProbe']);
                 subject['livenessProbe'] = this._k8sClientObject('probe', value['livenessProbe']);
-                subject['ports'] = this._k8sClientObject('container:port', value['ports']);
+                subject['ports'] = this._k8sClientObject('container:ports', value['ports']);
                 subject['command'] = this._k8sClientObject('type:array', value['command']);
                 subject['args'] = this._k8sClientObject('type:array', value['args']);
 
