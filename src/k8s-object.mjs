@@ -328,9 +328,6 @@ class K8sObject {
 
                 return subject;
             }
-            case 'creationtimestamp': {
-
-            }
             case 'metadata': {
 
                 const subject = new k8s.V1ObjectMeta();
