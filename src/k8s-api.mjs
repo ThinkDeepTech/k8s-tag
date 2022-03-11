@@ -42,6 +42,10 @@ class K8sApi {
                 console.log(`Using deployment creation strategy for \n${manifest.toString()}\n`);
                 return this._api.createNamespacedDeployment.bind(this._api, manifest.metadata().namespace, manifest.object());
             }
+            case 'Namespace': {
+                console.log(`Using namespace creation strategy for \n${manifest.toString()}\n`);
+                return this._api.createNamespace.bind(this._api, manifest.object());
+            }
             default: {
                 throw new Error(`K8s manifest kind not recognized. Received: ${manifest.kind()}`);
             }
@@ -74,6 +78,10 @@ class K8sApi {
             case 'Deployment': {
                 console.log(`Using deployment deletion strategy for \n${manifest.toString()}\n`);
                 return this._api.deleteNamespacedDeployment.bind(this._api, manifest.metadata().name, manifest.metadata().namespace);
+            }
+            case 'Namespace': {
+                console.log(`Using namespace deletion strategy for \n${manifest.toString()}\n`);
+                return this._api.deleteNamespace.bind(this._api, manifest.metadata().name);
             }
             default: {
                 throw new Error(`K8s manifest kind not recognized. Received: ${manifest.kind()}`);
