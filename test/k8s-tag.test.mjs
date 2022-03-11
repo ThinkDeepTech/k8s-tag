@@ -466,4 +466,38 @@ describe('k8s-tag', () => {
         expect(actual.spec.constructor.name).to.include('NamespaceSpec');
         expect(actual.status.constructor.name).to.include('NamespaceStatus');
     })
+
+    it('should correctly map kind configmap to a k8s client object', () => {
+        const subject = k8s`
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          annotations:
+            meta.helm.sh/release-name: v1
+            meta.helm.sh/release-namespace: development
+          creationTimestamp: "2022-03-08T15:46:18Z"
+          labels:
+            app.kubernetes.io/managed-by: Helm
+          name: v1-deep-microservice-collection-config-map
+          namespace: development
+        data:
+          GRAPHQL_PATH: /graphql
+          GRAPHQL_PORT: "4002"
+          HELM_RELEASE_NAME: v1
+          NAMESPACE: development
+          NODE_ENV: development
+        `;
+
+        const actual = subject._manifest._obj._obj;
+
+        console.log(subject.toString());
+
+        expect(actual.kind).to.equal('ConfigMap');
+        expect(actual.constructor.name).to.include('ConfigMap');
+        expect(actual.data['GRAPHQL_PATH']).to.equal('/graphql');
+        expect(actual.data['GRAPHQL_PORT']).to.equal('4002');
+        expect(actual.data['HELM_RELEASE_NAME']).to.equal('v1');
+        expect(actual.data['NAMESPACE']).to.equal('development');
+        expect(actual.data['NODE_ENV']).to.equal('development');
+    })
 })

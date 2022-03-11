@@ -46,6 +46,10 @@ class K8sApi {
                 console.log(`Using namespace creation strategy for \n${manifest.toString()}\n`);
                 return this._api.createNamespace.bind(this._api, manifest.object());
             }
+            case 'ConfigMap': {
+                console.log(`Using configmap creation strategy for \n${manifest.toString()}\n`);
+                return this._api.createNamespacedConfigMap.bind(this._api, manifest.metadata().namespace, manifest.object());
+            }
             default: {
                 throw new Error(`K8s manifest kind not yet supported. Received: ${manifest.kind()}`);
             }
@@ -82,6 +86,10 @@ class K8sApi {
             case 'Namespace': {
                 console.log(`Using namespace deletion strategy for \n${manifest.toString()}\n`);
                 return this._api.deleteNamespace.bind(this._api, manifest.metadata().name);
+            }
+            case 'ConfigMap': {
+                console.log(`Using configmap deletion strategy for \n${manifest.toString()}\n`);
+                return this._api.deleteNamespacedConfigMap.bind(this._api, manifest.metadata().name, manifest.metadata().namespace);
             }
             default: {
                 throw new Error(`K8s manifest kind not yet supported. Received: ${manifest.kind()}`);

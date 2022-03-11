@@ -24,8 +24,6 @@ class K8sObject {
 
     _k8sClientObject(key, value) {
 
-        console.log(`Processing key: ${key}`);
-
         if ((typeof value !== 'object') && !(Array.isArray(value)) && !key.includes('array'))
             return value;
 
@@ -96,6 +94,18 @@ class K8sObject {
                 this._runTransform(value, (field, val) => {
                     subject[field] = this._k8sClientObject(field, val[field]);
                 });
+
+                return subject;
+            }
+            case 'configmap': {
+                const subject = new k8s.V1ConfigMap();
+
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
+                }, ['binaryData', 'data']);
+
+                subject['binaryData'] = this._k8sClientObject('type:map', value['binaryData']);
+                subject['data'] = this._k8sClientObject('type:map', value['data']);
 
                 return subject;
             }
