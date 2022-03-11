@@ -12,6 +12,8 @@ is easy to understand, familiar and ubiquitous online.
 
 ```javascript
 
+import {k8s} from '@thinkdeep/k8s-tag';
+
 const options = {
     name: 'job-1',
     namespace: 'default',
