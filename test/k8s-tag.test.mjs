@@ -490,8 +490,6 @@ describe('k8s-tag', () => {
 
         const actual = subject._manifest._obj._obj;
 
-        console.log(subject.toString());
-
         expect(actual.kind).to.equal('ConfigMap');
         expect(actual.constructor.name).to.include('ConfigMap');
         expect(actual.data['GRAPHQL_PATH']).to.equal('/graphql');
@@ -499,5 +497,47 @@ describe('k8s-tag', () => {
         expect(actual.data['HELM_RELEASE_NAME']).to.equal('v1');
         expect(actual.data['NAMESPACE']).to.equal('development');
         expect(actual.data['NODE_ENV']).to.equal('development');
+    })
+
+    it('should correctly map kind PersistentVolume to a k8s client object', () => {
+        const subject = k8s`
+
+        apiVersion: v1
+        kind: PersistentVolume
+        metadata:
+          annotations:
+            pv.kubernetes.io/provisioned-by: dobs.csi.digitalocean.com
+          creationTimestamp: "2022-03-08T15:46:22Z"
+          finalizers:
+          - kubernetes.io/pv-protection
+          - external-attacher/dobs-csi-digitalocean-com
+          name: my-persistent-volume
+        spec:
+          accessModes:
+          - ReadWriteOnce
+          capacity:
+            storage: 8Gi
+          claimRef:
+            apiVersion: v1
+            kind: PersistentVolumeClaim
+            name: v1-analysismongodb
+            namespace: development
+          csi:
+            driver: dobs.csi.digitalocean.com
+            fsType: ext4
+            volumeAttributes:
+              storage.kubernetes.io/csiProvisionerIdentity: 1643213782115-8081-dobs.csi.digitalocean.com
+            volumeHandle: e72e4b60-9ef6-11ec-b54c-0a58ac14e15c
+          persistentVolumeReclaimPolicy: Delete
+          storageClassName: do-block-storage
+          volumeMode: Filesystem
+        status:
+          phase: Bound
+
+        `;
+
+        const actual = subject._manifest._obj._obj;
+
+        console.log(subject.toString());
     })
 })

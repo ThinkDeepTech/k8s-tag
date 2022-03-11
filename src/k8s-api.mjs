@@ -50,6 +50,10 @@ class K8sApi {
                 console.log(`Using configmap creation strategy for \n${manifest.toString()}\n`);
                 return this._api.createNamespacedConfigMap.bind(this._api, manifest.metadata().namespace, manifest.object());
             }
+            case 'PersistentVolume': {
+                console.log(`Using persistent volume creation strategy for \n${manifest.toString()}\n`);
+                return this._api.createPersistentVolume.bind(this._api, manifest.object());
+            }
             default: {
                 throw new Error(`K8s manifest kind not yet supported. Received: ${manifest.kind()}`);
             }
@@ -90,6 +94,10 @@ class K8sApi {
             case 'ConfigMap': {
                 console.log(`Using configmap deletion strategy for \n${manifest.toString()}\n`);
                 return this._api.deleteNamespacedConfigMap.bind(this._api, manifest.metadata().name, manifest.metadata().namespace);
+            }
+            case 'PersistentVolume': {
+                console.log(`Using persistent volume deletion strategy for \n${manifest.toString()}\n`);
+                return this._api.deletePersistentVolume.bind(this._api, manifest.metadata().name);
             }
             default: {
                 throw new Error(`K8s manifest kind not yet supported. Received: ${manifest.kind()}`);
