@@ -7,7 +7,7 @@ Tag function allowing interaction with the kubernetes node client through yaml c
 
 # Issues
 This project is actively being developed so many k8s objects aren't currently supported. If you experience issues
-please submit an issue (here)[https://github.com/ThinkDeepTech/k8s-tag/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc]
+please submit an issue [here](https://github.com/ThinkDeepTech/k8s-tag/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc)
 so that I can focus my efforts where there are needs.
 
 # Usage
