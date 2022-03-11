@@ -47,7 +47,7 @@ class K8sApi {
                 return this._api.createNamespace.bind(this._api, manifest.object());
             }
             default: {
-                throw new Error(`K8s manifest kind not recognized. Received: ${manifest.kind()}`);
+                throw new Error(`K8s manifest kind not yet supported. Received: ${manifest.kind()}`);
             }
         }
     }
@@ -84,7 +84,7 @@ class K8sApi {
                 return this._api.deleteNamespace.bind(this._api, manifest.metadata().name);
             }
             default: {
-                throw new Error(`K8s manifest kind not recognized. Received: ${manifest.kind()}`);
+                throw new Error(`K8s manifest kind not yet supported. Received: ${manifest.kind()}`);
             }
         }
     }
@@ -103,7 +103,7 @@ class K8sApi {
                 return this._kubeConfig.makeApiClient(k8s.CoreV1Api);
             }
             default: {
-                throw new Error(`The k8s apiVersion wasn't recognized. Received: ${apiVersion}`);
+                throw new Error(`The k8s apiVersion not yet supported. Received: ${apiVersion}`);
             }
         }
     }
