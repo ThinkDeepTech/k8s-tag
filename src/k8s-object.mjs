@@ -26,8 +26,6 @@ class K8sObject {
 
         console.log(`Processing key: ${key}`);
 
-        if (!value) return value;
-
         if ((typeof value !== 'object') && !(Array.isArray(value)) && !key.includes('array'))
             return value;
 
@@ -94,6 +92,54 @@ class K8sObject {
             }
             case 'secret': {
                 const subject = new k8s.V1Secret();
+
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
+                });
+
+                return subject;
+            }
+            case 'namespace': {
+                const subject = new k8s.V1Namespace();
+
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
+                }, ['spec', 'status']);
+
+                subject.spec = this._k8sClientObject('namespace:spec', value['spec']);
+                subject.status = this._k8sClientObject('namespace:status', value['status']);
+
+                return subject;
+            }
+            case 'namespace:spec': {
+                const subject = new k8s.V1NamespaceSpec();
+
+                subject.finalizers = this._k8sClientObject('type:array', value['finalizers']);
+
+                return subject;
+            }
+            case 'namespace:status': {
+                const subject = new k8s.V1NamespaceStatus();
+
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
+                }, ['conditions']);
+
+                subject['conditions'] = this._k8sClientObject('namespace:conditions', value['conditions']);
+
+                return subject;
+            }
+            case 'namespace:conditions': {
+                let vals = [];
+
+                for (const entry of value) {
+                    vals.push(this._k8sClientObject('namespace:condition', entry));
+                }
+
+                return vals;
+            }
+            case 'namespace:condition': {
+                const subject = new k8s.V1NamespaceCondition();
 
                 this._runTransform(value, (field, val) => {
                     subject[field] = this._k8sClientObject(field, val[field]);
@@ -754,6 +800,9 @@ class K8sObject {
                 subject.secretRef = secretRef;
 
                 return subject;
+            }
+            case 'creationtimestamp': {
+                return Date.parse(value) || null;
             }
             default: {
                 throw new Error(`The specified key wasn't found: ${key}`);

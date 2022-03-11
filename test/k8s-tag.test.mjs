@@ -159,7 +159,7 @@ describe('k8s-tag', () => {
         process.env.PREDECOS_KAFKA_SECRET = 'kafka-secret'
 
         const options = {
-            name: 'cronjob-1',
+            name: 'job-1',
             namespace: 'default',
             schedule: '* * * * *',
             image: 'busybox:latest',
@@ -252,6 +252,12 @@ describe('k8s-tag', () => {
 
     it('should correctly map kind pod to a k8s client object', () => {
 
+        const options = {
+            appLabel: 'some-application',
+            configMap: 'some-configmap',
+            secret: 'some-dynamic-secret-name'
+        };
+
         const subject = k8s`
             apiVersion: v1
             kind: Pod
@@ -259,10 +265,31 @@ describe('k8s-tag', () => {
                 name: private-reg
             spec:
                 containers:
-                    - name: private-reg-container
-                      image: <your-private-image>
+                    - envFrom:
+                        - configMapRef:
+                            name: ${options.configMap}
+                        - secretRef:
+                            name: ${options.secret}
+                        - secretRef:
+                            name: somesecret
+                      image: "busybox:latest"
+                      imagePullPolicy: Always
+                      name: ${options.appLabel}
+                      ports:
+                      - containerPort: 4002
+                        protocol: TCP
+                      resources: {}
+                      terminationMessagePath: /dev/termination-log
+                      terminationMessagePolicy: File
+                dnsPolicy: ClusterFirst
                 imagePullSecrets:
-                    - name: regcred
+                    - name: image-pull-secret
+                restartPolicy: Always
+                schedulerName: default-scheduler
+                securityContext: {}
+                serviceAccount: v1-collection-manager-service-account
+                serviceAccountName: v1-collection-manager-service-account
+                terminationGracePeriodSeconds: 30
         `;
 
         const actual = subject._manifest._obj._obj;
@@ -344,8 +371,6 @@ describe('k8s-tag', () => {
                 app.kubernetes.io/managed-by: Helm
             name: ${options.appLabel}-deployment
             namespace: development
-            resourceVersion: "10257013"
-            uid: 38998fac-e91d-4914-9ed4-f1cc7117273f
         spec:
             progressDeadlineSeconds: 600
             replicas: 1
@@ -415,5 +440,30 @@ describe('k8s-tag', () => {
 
         expect(actual.constructor.name).to.include('Deployment');
         expect(actual.spec.constructor.name).to.include('DeploymentSpec');
+    })
+
+    it('should correctly map kind namespace to a k8s client object', () => {
+
+        const subject = k8s`
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          creationTimestamp: "2022-03-08T15:30:07Z"
+          labels:
+            kubernetes.io/metadata.name: development
+          name: development
+        spec:
+          finalizers:
+          - kubernetes
+        status:
+          phase: Active
+        `;
+
+        const actual = subject._manifest._obj._obj;
+
+        expect(actual.kind).to.equal('Namespace');
+        expect(actual.constructor.name).to.include('Namespace');
+        expect(actual.spec.constructor.name).to.include('NamespaceSpec');
+        expect(actual.status.constructor.name).to.include('NamespaceStatus');
     })
 })
