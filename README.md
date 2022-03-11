@@ -10,7 +10,7 @@ The goal of this project is to abstract out the complexity of the [Kubernetes ja
 to mentally map to the equivalent yaml configuration. Instead, a yaml configuration is applied using the k8s tag which
 is easy to understand, familiar and ubiquitous online.
 
-'''javascript
+```javascript
 
 const options = {
     name: 'job-1',
@@ -54,7 +54,7 @@ await job.create();
 // Delete the job on the cluster.
 await job.delete();
 
-'''
+```
 
 This system is undergoing active development and has a ways to go. However, I intend to add support for as many
 kinds and apis as I can. Please create an issue if you test the current capabilities and an issue arises.
