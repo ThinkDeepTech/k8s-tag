@@ -805,7 +805,7 @@ class K8sObject {
                 return Date.parse(value) || null;
             }
             default: {
-                throw new Error(`The specified key wasn't found: ${key}`);
+                throw new Error(`The specified key isn't yet supported: ${key}`);
             }
         }
     }
