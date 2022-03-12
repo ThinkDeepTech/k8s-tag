@@ -329,7 +329,12 @@ describe('k8s-manifest', () => {
                     selector: {
                         matchLabels: {
                             "controller-uid": "50453798-481c-4381-8561-8bacf22b9444"
-                        }
+                        },
+                        matchExpressions: [{
+                            key: 'tier',
+                            operator: 'In',
+                            values: ['cache']
+                        }]
                     },
                     template: {
                         metadata: {
@@ -358,7 +363,89 @@ describe('k8s-manifest', () => {
             expect(subject.constructor.name).to.include('Job');
             expect(subject.apiVersion).to.equal('batch/v1');
             expect(subject.kind).to.equal('Job');
+        })
+
+        it('should create a job spec', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
             expect(subject.spec.constructor.name).to.include('JobSpec');
+        })
+
+        it('should correctly map pod template', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.template.constructor.name).to.include('PodTemplateSpec');
+        })
+
+        it('should correctly map pod template metadata', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.template.metadata.constructor.name).to.include('ObjectMeta');
+            expect(subject.spec.template.metadata.labels['controller-uid']).to.equal('50453798-481c-4381-8561-8bacf22b9444');
+            expect(subject.spec.template.metadata.labels['job-name']).to.equal('fetch-tweets-apple-business');
+
+        })
+
+        it('should correctly set selector match expressions', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(Array.isArray(subject.spec.selector.matchExpressions)).to.equal(true);
+            expect(subject.spec.selector.matchExpressions[0].constructor.name).to.include('LabelSelectorRequirement');
+
+            const firstExpression = subject.spec.selector.matchExpressions[0];
+            expect(firstExpression.key).to.equal('tier');
+            expect(firstExpression.operator).to.equal('In');
+            expect(Array.isArray(firstExpression.values)).to.equal(true);
+            expect(firstExpression.values[0]).to.equal('cache');
+
+        })
+
+        it('should correctly set selector match labels', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.selector.matchLabels['controller-uid']).to.equal("50453798-481c-4381-8561-8bacf22b9444");
+        })
+
+        it('should correctly set selector', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.selector.constructor.name).to.include('LabelSelector');
+        })
+
+        it('should correctly set parallelism', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.parallelism).to.equal(1);
+        })
+
+        it('should correctly set completions', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.completions).to.equal(1);
+        })
+
+        it('should correctly set backoff limit', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.backoffLimit).to.equal(6);
         })
     })
 
@@ -450,35 +537,4 @@ describe('k8s-manifest', () => {
 
     })
 
-    it('should correctly map Job to a k8s client object', () => {
-
-    })
-
-    it('should correctly map Service to a k8s client object', () => {
-
-    })
-
-    it('should correctly map Deployment to a k8s client object', () => {
-
-    })
-
-    it('should correctly map Secret to a k8s client object', () => {
-
-    })
-
-    it('should correctly map ConfigMap to a k8s client object', () => {
-
-    })
-
-    it('should correctly map PersistentVolume to a k8s client object', () => {
-
-    })
-
-    describe('_k8sClientObject', () => {
-
-        it('should throw an error if an unknown key is supplied', () => {
-
-
-        })
-    })
 })

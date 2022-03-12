@@ -423,20 +423,30 @@ class K8sManifest {
             'label:selector': (value) => {
                 const subject = new k8s.V1LabelSelector();
 
-                subject['matchExpressions'] = this._k8sClientObject('label:selector:requirement', value['matchExpressions']);
+                subject['matchExpressions'] = this._k8sClientObject('label:selector:requirements', value['matchExpressions']);
                 subject['matchLabels'] = this._k8sClientObject('type:map', value['matchLabels']);
 
                 return subject;
+            },
+            'label:selector:requirements': (value) => {
+                let vals = [];
+
+                for (const entry of value) {
+                    vals.push(this._k8sClientObject('label:selector:requirement', entry));
+                }
+
+                return vals;
             },
             'label:selector:requirement': (value) => {
 
                 const subject = new k8s.V1LabelSelectorRequirement();
 
                 this._runTransform(value, (field, val) => {
+                    console.log(`field ${field}, val ${val}`);
                     subject[field] = this._k8sClientObject(field, val[field]);
                 }, ['values']);
 
-                subject['values'] = this._k8sClientObject('type:array', values['values']);
+                subject['values'] = this._k8sClientObject('type:array', value['values']);
 
                 return subject;
             },
