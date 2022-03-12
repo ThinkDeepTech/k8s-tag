@@ -20,35 +20,39 @@ class K8sApi {
         switch(manifest.kind()) {
             case 'CronJob': {
                 console.log(`Using cron job creation strategy for \n${manifest.toString()}\n`);
-                return this._api.createNamespacedCronJob.bind(this._api, manifest.metadata().namespace, manifest.object());
+                return this._api.createNamespacedCronJob.bind(this._api, manifest.metadata().namespace, manifest.k8sClientObject());
             }
             case 'Job': {
                 console.log(`Using job creation strategy for \n${manifest.toString()}\n`);
-                return this._api.createNamespacedJob.bind(this._api, manifest.metadata().namespace, manifest.object());
+                return this._api.createNamespacedJob.bind(this._api, manifest.metadata().namespace, manifest.k8sClientObject());
             }
             case 'Pod': {
                 console.log(`Using pod creation strategy for \n${manifest.toString()}\n`);
-                return this._api.createNamespacedPod.bind(this._api, manifest.metadata().namespace, manifest.object());
+                return this._api.createNamespacedPod.bind(this._api, manifest.metadata().namespace, manifest.k8sClientObject());
             }
             case 'Secret': {
                 console.log(`Using secret creation strategy for \n${manifest.toString()}\n`);
-                return this._api.createNamespacedSecret.bind(this._api, manifest.metadata().namespace, manifest.object());
+                return this._api.createNamespacedSecret.bind(this._api, manifest.metadata().namespace, manifest.k8sClientObject());
             }
             case 'Service': {
                 console.log(`Using service creation strategy for \n${manifest.toString()}\n`);
-                return this._api.createNamespacedService.bind(this._api, manifest.metadata().namespace, manifest.object());
+                return this._api.createNamespacedService.bind(this._api, manifest.metadata().namespace, manifest.k8sClientObject());
             }
             case 'Deployment': {
                 console.log(`Using deployment creation strategy for \n${manifest.toString()}\n`);
-                return this._api.createNamespacedDeployment.bind(this._api, manifest.metadata().namespace, manifest.object());
+                return this._api.createNamespacedDeployment.bind(this._api, manifest.metadata().namespace, manifest.k8sClientObject());
             }
             case 'Namespace': {
                 console.log(`Using namespace creation strategy for \n${manifest.toString()}\n`);
-                return this._api.createNamespace.bind(this._api, manifest.object());
+                return this._api.createNamespace.bind(this._api, manifest.k8sClientObject());
             }
             case 'ConfigMap': {
                 console.log(`Using configmap creation strategy for \n${manifest.toString()}\n`);
-                return this._api.createNamespacedConfigMap.bind(this._api, manifest.metadata().namespace, manifest.object());
+                return this._api.createNamespacedConfigMap.bind(this._api, manifest.metadata().namespace, manifest.k8sClientObject());
+            }
+            case 'PersistentVolume': {
+                console.log(`Using persistent volume creation strategy for \n${manifest.toString()}\n`);
+                return this._api.createPersistentVolume.bind(this._api, manifest.k8sClientObject());
             }
             default: {
                 throw new Error(`K8s manifest kind not yet supported. Received: ${manifest.kind()}`);
@@ -90,6 +94,10 @@ class K8sApi {
             case 'ConfigMap': {
                 console.log(`Using configmap deletion strategy for \n${manifest.toString()}\n`);
                 return this._api.deleteNamespacedConfigMap.bind(this._api, manifest.metadata().name, manifest.metadata().namespace);
+            }
+            case 'PersistentVolume': {
+                console.log(`Using persistent volume deletion strategy for \n${manifest.toString()}\n`);
+                return this._api.deletePersistentVolume.bind(this._api, manifest.metadata().name);
             }
             default: {
                 throw new Error(`K8s manifest kind not yet supported. Received: ${manifest.kind()}`);
