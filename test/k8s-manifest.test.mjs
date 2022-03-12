@@ -30,6 +30,16 @@ describe('k8s-manifest', () => {
                                 name: 'secret-name'
                             }
                         }],
+                        resources: {
+                            requests: {
+                                memory: "64Mi",
+                                cpu: "250m"
+                            },
+                            limits: {
+                                memory: "128Mi",
+                                cpu: "500m"
+                            }
+                        },
                         ports: [{
                             name: "liveness-port",
                             containerPort: 8080,
@@ -124,6 +134,18 @@ describe('k8s-manifest', () => {
             expect(subject.spec.containers[0].ports[0].name).to.equal('liveness-port');
             expect(subject.spec.containers[0].ports[0].containerPort).to.equal(8080);
             expect(subject.spec.containers[0].ports[0].hostPort).to.equal(8080);
+        })
+
+        it('should correctly map resources', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.containers[0].resources.constructor.name).to.include('ResourceRequirements');
+            expect(subject.spec.containers[0].resources.requests.memory).to.equal('64Mi');
+            expect(subject.spec.containers[0].resources.requests.cpu).to.equal('250m');
+            expect(subject.spec.containers[0].resources.limits.memory).to.equal('128Mi');
+            expect(subject.spec.containers[0].resources.limits.cpu).to.equal('500m');
         })
 
         it('should correctly map command', () => {
