@@ -542,6 +542,6 @@ describe('k8s-tag', () => {
 
         const actual = subject._manifest._obj;
 
-        console.log(subject.toString());
+        // console.log(subject.toString());
     })
 })

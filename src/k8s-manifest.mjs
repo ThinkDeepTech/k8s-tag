@@ -230,7 +230,6 @@ class K8sManifest {
                 return subject;
             },
             'cronjob': (value) => {
-                console.log(`Creating cron job`);
                 const subject = new k8s.V1CronJob();
 
                 this._runTransform(value, (field, val) => {
