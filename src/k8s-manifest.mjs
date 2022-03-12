@@ -1171,10 +1171,6 @@ class K8sManifest {
 
         const valueTransform = this._fieldMap[key.toLowerCase()];
 
-        // if (!valueTransform) {
-        //     throw new Error(`The key requested hasn't yet been implemented: ${key}`);
-        // }
-
         return valueTransform(value);
     }
 
