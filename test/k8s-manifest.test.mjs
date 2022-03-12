@@ -21,6 +21,15 @@ describe('k8s-manifest', () => {
                         image: 'nginx',
                         command: ['/bin/bash'],
                         args: ['-c', 'echo "Hello"'],
+                        envFrom: [{
+                            configMapRef: {
+                                name: 'config-map'
+                            }
+                        },{
+                            secretRef: {
+                                name: 'secret-name'
+                            }
+                        }],
                         ports: [{
                             name: "liveness-port",
                             containerPort: 8080,
@@ -54,6 +63,22 @@ describe('k8s-manifest', () => {
 
             expect(Array.isArray(subject.spec.containers)).to.equal(true);
             expect(subject.spec.containers[0].constructor.name).to.include('Container');
+        })
+
+        it('should correctly map name', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.containers[0].name).to.include('container-name');
+        })
+
+        it('should correctly map image', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.containers[0].image).to.include('nginx');
         })
 
         it('should correctly map startup probe', () => {
@@ -119,6 +144,28 @@ describe('k8s-manifest', () => {
             expect(subject.spec.containers[0].args[0]).to.equal('-c');
             expect(subject.spec.containers[0].args[1]).to.equal('echo "Hello"');
         })
+
+        it('should correctly map envFrom', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(Array.isArray(subject.spec.containers[0].envFrom)).to.equal(true);
+
+            const envFrom = subject.spec.containers[0].envFrom;
+
+            const configMapKey = Object.keys(envFrom[0])[0];
+            const secretRefKey = Object.keys(envFrom[1])[0];
+            expect(configMapKey).to.equal('configMapRef');
+            expect(envFrom[0].constructor.name).to.include('EnvFromSource');
+            expect(envFrom[0][configMapKey].constructor.name).to.include('ConfigMapEnvSource');
+            expect(envFrom[0][configMapKey].name).to.equal('config-map');
+
+            expect(secretRefKey).to.equal('secretRef');
+            expect(envFrom[1].constructor.name).to.include('EnvFromSource');
+            expect(envFrom[1][secretRefKey].constructor.name).to.include('SecretEnvSource');
+            expect(envFrom[1][secretRefKey].name).to.equal('secret-name');
+        })
     })
 
     describe('pod mapping', () => {
@@ -134,7 +181,17 @@ describe('k8s-manifest', () => {
                     containers: [{
                         name: 'container-name',
                         image: 'nginx'
-                    }]
+                    }],
+                    dnsPolicy: "ClusterFirst",
+                    imagePullSecrets: [{
+                        name: "docker-secret"
+                    }],
+                    restartPolicy: "Never",
+                    schedulerName: "default-scheduler",
+                    securityContext: {},
+                    serviceAccount: "service-account",
+                    serviceAccountName: "service-account-name",
+                    terminationGracePeriodSeconds: 30
                 }
             };
         });
@@ -164,6 +221,122 @@ describe('k8s-manifest', () => {
 
             expect(Array.isArray(subject.spec.containers)).to.equal(true);
             expect(subject.spec.containers[0].constructor.name).to.include('Container');
+        })
+
+        it('should set the termination grace period', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.terminationGracePeriodSeconds).to.equal(30);
+        })
+
+        it('should set the scheduler name', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.serviceAccountName).to.equal('service-account-name');
+        })
+
+
+        it('should set the serviceAccount', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.serviceAccount).to.equal('service-account');
+        })
+
+        it('should set the security context', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.securityContext.constructor.name).to.include('SecurityContext');
+        })
+
+        it('should set the scheduler name', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.schedulerName).to.equal('default-scheduler');
+        })
+
+        it('should set the restart policy', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.restartPolicy).to.equal('Never');
+        })
+
+        it('should set the dnsPolicy', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.dnsPolicy).to.equal('ClusterFirst');
+        })
+
+        it('should set the image pull secrets', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(Array.isArray(subject.spec.imagePullSecrets)).to.equal(true)
+            expect(subject.spec.imagePullSecrets[0].constructor.name).to.include('LocalObjectReference');
+            expect(subject.spec.imagePullSecrets[0].name).to.equal('docker-secret');
+        })
+    })
+
+    describe('job mapping', () => {
+        let parsedYaml;
+        beforeEach(() => {
+            parsedYaml = {
+                apiVersion: 'batch/v1',
+                kind: 'Job',
+                metadata: {
+                    name: 'job'
+                },
+                spec: {
+                    backoffLimit: 6,
+                    completions: 1,
+                    parallelism: 1,
+                    selector: {
+                        matchLabels: {
+                            "controller-uid": "50453798-481c-4381-8561-8bacf22b9444"
+                        }
+                    },
+                    template: {
+                        metadata: {
+                            labels: {
+                                "controller-uid": "50453798-481c-4381-8561-8bacf22b9444",
+                                "job-name": "fetch-tweets-apple-business"
+                            },
+                            creationTimestamp: null
+                        },
+                        spec: {
+                            containers: [{
+                                name: 'container-name',
+                                image: 'nginx'
+                            }]
+                        }
+                    }
+                }
+            };
+        });
+
+        it('should create a k8s client job', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.constructor.name).to.include('Job');
+            expect(subject.apiVersion).to.equal('batch/v1');
+            expect(subject.kind).to.equal('Job');
+            expect(subject.spec.constructor.name).to.include('JobSpec');
         })
     })
 

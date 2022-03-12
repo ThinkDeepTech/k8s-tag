@@ -282,8 +282,9 @@ class K8sManifest {
 
                 this._runTransform(value, (field, val) => {
                     subject[field] = this._k8sClientObject(field, val[field]);
-                }, ['template']);
+                }, ['template', 'selector']);
 
+                subject.selector = this._k8sClientObject('label:selector', value['selector']);
                 subject.template = this._k8sClientObject('pod:template', value['template']);
 
                 return subject;
@@ -1169,6 +1170,10 @@ class K8sManifest {
             return value;
 
         const valueTransform = this._fieldMap[key.toLowerCase()];
+
+        if (!valueTransform) {
+            throw new Error(`The requested key hasn't yet been implemented: ${key}`);
+        }
 
         return valueTransform(value);
     }
