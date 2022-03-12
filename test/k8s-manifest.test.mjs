@@ -381,6 +381,14 @@ describe('k8s-manifest', () => {
             expect(subject.spec.template.constructor.name).to.include('PodTemplateSpec');
         })
 
+        it('should correctly map pod spec', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.template.spec.constructor.name).to.include('PodSpec');
+        })
+
         it('should correctly map pod template metadata', () => {
             const manifest = new K8sManifest(parsedYaml);
 
@@ -460,6 +468,7 @@ describe('k8s-manifest', () => {
                     name: 'cron-job'
                 },
                 spec: {
+                    schedule: '* * * * *',
                     jobTemplate: {
                         spec: {
                             template: {
@@ -484,7 +493,6 @@ describe('k8s-manifest', () => {
             expect(subject.constructor.name).to.include('CronJob');
             expect(subject.apiVersion).to.equal('batch/v1');
             expect(subject.kind).to.equal('CronJob');
-            expect(subject.spec.constructor.name).to.include('CronJobSpec');
         })
 
         it('should create a k8s client cron job spec', () => {
@@ -493,6 +501,14 @@ describe('k8s-manifest', () => {
             const subject = manifest.k8sClientObject();
 
             expect(subject.spec.constructor.name).to.include('CronJobSpec');
+        })
+
+        it('should correctly map the schedule', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.schedule).to.equal('* * * * *');
         })
 
         it('should create a k8s client job template', () => {
@@ -510,31 +526,6 @@ describe('k8s-manifest', () => {
 
             expect(subject.spec.jobTemplate.spec.constructor.name).to.include('JobSpec');
         })
-
-        it('should create a k8s client pod template spec', () => {
-            const manifest = new K8sManifest(parsedYaml);
-
-            const subject = manifest.k8sClientObject();
-
-            expect(subject.spec.jobTemplate.spec.template.constructor.name).to.include('PodTemplateSpec');
-        })
-
-        it('should create a k8s client pod spec', () => {
-            const manifest = new K8sManifest(parsedYaml);
-
-            const subject = manifest.k8sClientObject();
-
-            expect(subject.spec.jobTemplate.spec.template.spec.constructor.name).to.include('PodSpec');
-        })
-
-        it('should create a k8s client pod spec', () => {
-            const manifest = new K8sManifest(parsedYaml);
-
-            const subject = manifest.k8sClientObject();
-
-            expect(subject.spec.jobTemplate.spec.template.spec.constructor.name).to.include('PodSpec');
-        })
-
     })
 
 })
