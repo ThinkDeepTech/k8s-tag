@@ -20,7 +20,7 @@ describe('k8s-tag', () => {
             args: ['something', 'else']
         };
 
-        const cronjob = k8s`
+        const subject = k8s`
             apiVersion: "batch/v1"
             kind: "CronJob"
             metadata:
@@ -50,7 +50,7 @@ describe('k8s-tag', () => {
                                 restartPolicy: "Never"
         `;
 
-        const actual = cronjob._manifest._obj._obj;
+        const actual = subject._manifest._obj;
 
         expect(actual.apiVersion).to.equal('batch/v1');
         expect(actual.kind).to.equal('CronJob');
@@ -73,7 +73,7 @@ describe('k8s-tag', () => {
             args: ['something', 'else']
         };
 
-        const cronjob = k8s`
+        const subject = k8s`
             apiVersion: "batch/v1"
             kind: "CronJob"
             metadata:
@@ -101,9 +101,11 @@ describe('k8s-tag', () => {
                                 restartPolicy: "Never"
         `;
 
-        expect(Array.isArray(cronjob._manifest._obj._obj.spec.jobTemplate.spec.template.spec.containers[0].args)).to.equal(true);
-        expect(cronjob._manifest._obj._obj.spec.jobTemplate.spec.template.spec.containers[0].args[0]).to.equal(options.args[0]);
-        expect(cronjob._manifest._obj._obj.spec.jobTemplate.spec.template.spec.containers[0].args[1]).to.equal(options.args[1]);
+        const actual = subject._manifest._obj;
+
+        expect(Array.isArray(actual.spec.jobTemplate.spec.template.spec.containers[0].args)).to.equal(true);
+        expect(actual.spec.jobTemplate.spec.template.spec.containers[0].args[0]).to.equal(options.args[0]);
+        expect(actual.spec.jobTemplate.spec.template.spec.containers[0].args[1]).to.equal(options.args[1]);
     })
 
     it('should correctly handle an array when passed in using array.map', () => {
@@ -119,7 +121,7 @@ describe('k8s-tag', () => {
             args: ['something', 'else']
         };
 
-        const cronjob = k8s`
+        const subject = k8s`
             apiVersion: "batch/v1"
             kind: "CronJob"
             metadata:
@@ -149,9 +151,11 @@ describe('k8s-tag', () => {
                                 restartPolicy: "Never"
         `;
 
-        expect(Array.isArray(cronjob._manifest._obj._obj.spec.jobTemplate.spec.template.spec.containers[0].args)).to.equal(true);
-        expect(cronjob._manifest._obj._obj.spec.jobTemplate.spec.template.spec.containers[0].args[0]).to.equal(options.args[0]);
-        expect(cronjob._manifest._obj._obj.spec.jobTemplate.spec.template.spec.containers[0].args[1]).to.equal(options.args[1]);
+        const actual = subject._manifest._obj;
+
+        expect(Array.isArray(actual.spec.jobTemplate.spec.template.spec.containers[0].args)).to.equal(true);
+        expect(actual.spec.jobTemplate.spec.template.spec.containers[0].args[0]).to.equal(options.args[0]);
+        expect(actual.spec.jobTemplate.spec.template.spec.containers[0].args[1]).to.equal(options.args[1]);
     })
 
     it('should correctly map kind job to a k8s client object', () => {
@@ -167,7 +171,7 @@ describe('k8s-tag', () => {
             args: ['something', 'else']
         };
 
-        const job = k8s`
+        const subject = k8s`
             apiVersion: "batch/v1"
             kind: "Job"
             metadata:
@@ -194,7 +198,7 @@ describe('k8s-tag', () => {
                             - name: "docker-secret"
         `;
 
-        const actual = job._manifest._obj._obj;
+        const actual = subject._manifest._obj;
 
         expect(actual.apiVersion).to.equal('batch/v1');
         expect(actual.kind).to.equal('Job');
@@ -238,7 +242,7 @@ describe('k8s-tag', () => {
                 extra: YmFyCg==
         `;
 
-        const actual = subject._manifest._obj._obj;
+        const actual = subject._manifest._obj;
 
         expect(actual.constructor.name).to.include('Secret');
         expect(actual.apiVersion).to.equal('v1');
@@ -292,7 +296,7 @@ describe('k8s-tag', () => {
                 terminationGracePeriodSeconds: 30
         `;
 
-        const actual = subject._manifest._obj._obj;
+        const actual = subject._manifest._obj;
 
         expect(actual.constructor.name).to.include('Pod');
         expect(actual.apiVersion).to.equal('v1');
@@ -334,7 +338,7 @@ describe('k8s-tag', () => {
           loadBalancer: {}
         `;
 
-        const actual = subject._manifest._obj._obj;
+        const actual = subject._manifest._obj;
 
         expect(actual.constructor.name).to.include('Service');
         expect(actual.apiVersion).to.equal('v1');
@@ -436,7 +440,7 @@ describe('k8s-tag', () => {
             updatedReplicas: 1
         `;
 
-        const actual = subject._manifest._obj._obj;
+        const actual = subject._manifest._obj;
 
         expect(actual.constructor.name).to.include('Deployment');
         expect(actual.spec.constructor.name).to.include('DeploymentSpec');
@@ -459,7 +463,7 @@ describe('k8s-tag', () => {
           phase: Active
         `;
 
-        const actual = subject._manifest._obj._obj;
+        const actual = subject._manifest._obj;
 
         expect(actual.kind).to.equal('Namespace');
         expect(actual.constructor.name).to.include('Namespace');
@@ -488,7 +492,7 @@ describe('k8s-tag', () => {
           NODE_ENV: development
         `;
 
-        const actual = subject._manifest._obj._obj;
+        const actual = subject._manifest._obj;
 
         expect(actual.kind).to.equal('ConfigMap');
         expect(actual.constructor.name).to.include('ConfigMap');
@@ -536,7 +540,7 @@ describe('k8s-tag', () => {
 
         `;
 
-        const actual = subject._manifest._obj._obj;
+        const actual = subject._manifest._obj;
 
         console.log(subject.toString());
     })
