@@ -528,4 +528,72 @@ describe('k8s-manifest', () => {
         })
     })
 
+    describe('deployment mapping', () => {
+
+        let parsedYaml;
+        beforeEach(() => {
+            parsedYaml = {
+                apiVersion: 'apps/v1',
+                kind: 'Deployment',
+                metadata: {
+                    name: 'application-deployment',
+                    namespace: 'development'
+                },
+                spec: {
+                    progressDeadlineSeconds: 600,
+                    replicas: 1,
+                    revisionHistoryLimit: 10,
+                    selector: {
+                        matchLabels: {
+                            app: 'application-deployment'
+                        }
+                    },
+                    strategy: {
+                        rollingUpdate: {
+                            maxSurge: '25%',
+                            maxUnavailable: '25%'
+                        },
+                        type: 'RollingUpdate'
+                    }
+                }
+            };
+        });
+
+    })
+
+    describe('metadata mapping', () => {
+
+        let parsedYaml;
+        beforeEach(() => {
+            parsedYaml = {
+                apiVersion: 'apps/v1',
+                kind: 'Deployment',
+                metadata: {
+                    annotations: {
+                        'deployment.kubernetes.io/revision': "1",
+                        'meta.helm.sh/release-name': 'v1',
+                        'meta.helm.sh/release-namespace': 'development',
+                        creationTimestamp: "2022-03-08T15:46:18Z",
+                        generation: 1,
+                    },
+                    labels: {
+                        app: 'application-label',
+                        'app.kubernetes.io/managed-by': 'Helm'
+                    },
+                    name: 'application-deployment',
+                    namespace: 'development'
+                }
+            };
+        });
+
+        it('should correctly map to k8s client metadata', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.metadata.constructor.name).to.include('ObjectMeta');
+        })
+
+    })
+
 })

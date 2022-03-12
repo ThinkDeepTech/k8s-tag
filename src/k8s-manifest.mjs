@@ -64,6 +64,8 @@ class K8sManifest {
                     subject[field] = this._k8sClientObject(field, val[field]);
                 }, ['labels', 'finalizers', 'managedFields']);
 
+                // TODO: Implement all fields
+
                 subject.labels = this._k8sClientObject('type:map', value['labels']);
                 subject.finalizers = this._k8sClientObject('type:array', value['finalizers']);
                 subject.managedFields = this._k8sClientObject('metadata:managed:fields', value['managedFields']);
