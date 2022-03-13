@@ -65,7 +65,6 @@ class K8sManifest {
                 }, ['labels', 'finalizers', 'managedFields']);
 
                 // TODO: Implement all fields
-
                 subject.labels = this._k8sClientObject('type:map', value['labels']);
                 subject.finalizers = this._k8sClientObject('type:array', value['finalizers']);
                 subject.managedFields = this._k8sClientObject('metadata:managed:fields', value['managedFields']);
@@ -1009,6 +1008,27 @@ class K8sManifest {
             },
             'creationtimestamp': (value) => {
                 return Date.parse(value) || null;
+            },
+            'deletiontimestamp': (value) => {
+                return Date.parse(value) || null;
+            },
+            'ownerreferences': (value) => {
+                let vals = [];
+
+                for (const entry of value) {
+                    vals.push(this._k8sClientObject('ownerreference', entry));
+                }
+
+                return vals;
+            },
+            'ownerreference': (value) => {
+                const subject = new k8s.V1OwnerReference();
+
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
+                });
+
+                return subject;
             },
             'httpget': (value) => {
                 const subject = new k8s.V1HTTPGetAction();

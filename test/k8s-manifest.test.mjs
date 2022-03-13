@@ -540,9 +540,11 @@ describe('k8s-manifest', () => {
                     namespace: 'development'
                 },
                 spec: {
+                    minReadySeconds: 60,
                     progressDeadlineSeconds: 600,
-                    replicas: 1,
+                    replicas: 3,
                     revisionHistoryLimit: 10,
+                    paused: false,
                     selector: {
                         matchLabels: {
                             app: 'application-deployment'
@@ -554,11 +556,102 @@ describe('k8s-manifest', () => {
                             maxUnavailable: '25%'
                         },
                         type: 'RollingUpdate'
+                    },
+                    template: {
+                        spec: {
+                            containers: []
+                        }
                     }
                 }
             };
         });
 
+        it('should correctly map to k8s client deployment', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.constructor.name).to.include('Deployment');
+            expect(subject.kind).to.equal('Deployment');
+            expect(subject.apiVersion).to.equal('apps/v1');
+        })
+
+        it('should correctly map deployment spec', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.constructor.name).to.include('DeploymentSpec');
+        })
+
+        it('should correctly map deployment spec min ready seconds', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.minReadySeconds).to.equal(60);
+        })
+
+        it('should correctly map deployment spec replicas', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.replicas).to.equal(3);
+        })
+
+        it('should correctly map deployment spec progress deadline', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.progressDeadlineSeconds).to.equal(600);
+        })
+
+        it('should correctly map deployment spec revision history limit', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.revisionHistoryLimit).to.equal(10);
+        })
+
+        it('should correctly map deployment spec paused', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.paused).to.equal(false);
+        })
+
+        it('should correctly map deployment spec strategy', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.strategy.constructor.name).to.include('DeploymentStrategy');
+            expect(subject.spec.strategy.type).to.equal('RollingUpdate');
+            expect(subject.spec.strategy.rollingUpdate.constructor.name).to.include('RollingUpdateDeployment');
+            expect(subject.spec.strategy.rollingUpdate.maxSurge).to.equal('25%');
+            expect(subject.spec.strategy.rollingUpdate.maxUnavailable).to.equal('25%');
+        })
+
+        it('should correctly map deployment spec selector', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.selector.constructor.name).to.include('LabelSelector');
+            expect(subject.spec.selector.matchLabels['app']).to.equal("application-deployment");
+        })
+
+        it('should correctly map deployment spec template', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.template.constructor.name).to.include('PodTemplateSpec');
+        })
     })
 
     describe('metadata mapping', () => {
@@ -570,7 +663,7 @@ describe('k8s-manifest', () => {
                 kind: 'Deployment',
                 metadata: {
                     annotations: {
-                        'deployment.kubernetes.io/revision': "1",
+                        'deployment.kubernetes.io/revision': 1,
                         'meta.helm.sh/release-name': 'v1',
                         'meta.helm.sh/release-namespace': 'development',
                         creationTimestamp: "2022-03-08T15:46:18Z",
@@ -581,7 +674,13 @@ describe('k8s-manifest', () => {
                         'app.kubernetes.io/managed-by': 'Helm'
                     },
                     name: 'application-deployment',
-                    namespace: 'development'
+                    namespace: 'development',
+                    ownerReferences: [{
+                        apiVersion: 'cache.example.com/v1alpha1',
+                        kind: 'Memcached',
+                        name: 'example-memcached',
+                        uid: 'ad834522-d9a5-4841-beac-991ff3798c00'
+                    }]
                 }
             };
         });
@@ -592,6 +691,56 @@ describe('k8s-manifest', () => {
             const subject = manifest.k8sClientObject();
 
             expect(subject.metadata.constructor.name).to.include('ObjectMeta');
+        })
+
+        it('should correctly map annotations', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.metadata.annotations['deployment.kubernetes.io/revision']).to.equal(1);
+            expect(subject.metadata.annotations['meta.helm.sh/release-name']).to.equal('v1');
+            expect(subject.metadata.annotations['meta.helm.sh/release-namespace']).to.equal('development');
+            expect(subject.metadata.annotations['creationTimestamp']).to.equal('2022-03-08T15:46:18Z');
+            expect(subject.metadata.annotations['generation']).to.equal(1);
+        })
+
+        it('should correctly map labels', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.metadata.labels['app']).to.equal('application-label');
+            expect(subject.metadata.labels['app.kubernetes.io/managed-by']).to.equal('Helm');
+        })
+
+        it('should correctly map name', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.metadata.name).to.equal('application-deployment');
+        })
+
+        it('should correctly map namespace', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.metadata.namespace).to.equal('development');
+        })
+
+        it('should correctly map owner references', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(Array.isArray(subject.metadata.ownerReferences)).to.equal(true);
+            expect(subject.metadata.ownerReferences[0].constructor.name).to.include('OwnerReference');
+            expect(subject.metadata.ownerReferences[0].apiVersion).to.include('cache.example.com/v1alpha1');
+            expect(subject.metadata.ownerReferences[0].kind).to.equal('Memcached');
+            expect(subject.metadata.ownerReferences[0].name).to.equal('example-memcached');
+            expect(subject.metadata.ownerReferences[0].uid).to.equal('ad834522-d9a5-4841-beac-991ff3798c00');
         })
 
     })
