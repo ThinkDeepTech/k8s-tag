@@ -23,7 +23,7 @@ class K8sManifest {
             'persistentvolume:spec': (value) => {
                 const subject = new k8s.V1PersistentVolumeSpec();
 
-                subject.accessModes = this._k8sClientObject('type:array');
+                subject.accessModes = this._k8sClientObject('type:array', value['accessModes']);
                 subject.awsElasticBlockStore = this._k8sClientObject('aws:elastic:block:store', value['awsElasticBlockStore']);
                 subject.azureDisk = this._k8sClientObject('azure:disk', value['azureDisk']);
                 subject.azureFile = this._k8sClientObject('azure:file', value['azureFile']);

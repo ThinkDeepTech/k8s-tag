@@ -654,6 +654,223 @@ describe('k8s-manifest', () => {
         })
     })
 
+    describe('persistent volume mapping', () => {
+
+        let parsedYaml;
+        beforeEach(() => {
+            parsedYaml = {
+                apiVersion: 'v1',
+                kind: 'PersistentVolume',
+                metadata: {
+                    annotations: {
+                        'pv.kubernetes.io/provisioned-by': 'dobs.csi.digitalocean.com'
+                    },
+                    creationTimestamp: "2022-03-08T15:46:22Z",
+                    finalizers: [
+                        'kubernetes.io/pv-protection',
+                        'external-attacher/dobs-csi-digitalocean-com'
+                    ],
+                    name: 'my-persistent-volume'
+                },
+                spec: {
+                    accessModes: ['ReadWriteOnce'],
+                    awsElasticBlockStore: {
+                        fsType: 'type',
+                        partition: 'partition',
+                        readOnly: true,
+                        volumeID: '1'
+                    },
+                    azureDisk: {
+                        cachingMode: 'mode',
+                        diskName: 'disk-name',
+                        diskURI: 'disk://whatever/path',
+                        fsType: 'type',
+                        kind: 'disk-kind',
+                        readOnly: false
+                    },
+                    azureFile: {
+                        readOnly: false,
+                        secretName: 'secret-name',
+                        secretNamespace: 'secret-namespace',
+                        shareName: 'share-name'
+                    },
+                    capacity: {
+                        storage: '8Gi'
+                    },
+                    claimRef: {
+                        apiVersion: 'v1',
+                        kind: 'PersistentVolumeClaim',
+                        name: 'v1-analysismongodb',
+                        namespace: 'development'
+                    },
+                    csi: {
+                        driver: 'dobs.csi.digitalocean.com',
+                        fsType: 'ext4',
+                        volumeAttributes: {
+                            'storage.kubernetes.io/csiProvisionerIdentity': '1643213782115-8081-dobs.csi.digitalocean.com'
+                        },
+                        volumeHandle: 'e72e4b60-9ef6-11ec-b54c-0a58ac14e15c'
+                    },
+                    persistentVolumeReclaimPolicy: 'Delete',
+                    storageClassName: 'do-block-storage',
+                    volumeMode: 'Filesystem'
+                }
+            };
+        });
+
+        it('should correctly map to k8s client persistent volume', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.constructor.name).to.include('PersistentVolume');
+            expect(subject.kind).to.equal('PersistentVolume');
+            expect(subject.apiVersion).to.equal('v1');
+        })
+
+        it('should correctly map to k8s client persistent volume spec', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.constructor.name).to.include('PersistentVolumeSpec');
+        })
+
+        it('should correctly map persistent volume spec access modes ', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(Array.isArray(subject.spec.accessModes)).to.equal(true);
+            expect(subject.spec.accessModes[0]).to.equal('ReadWriteOnce');
+        })
+
+        it('should correctly map persistent volume spec aws elastic block store ', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.awsElasticBlockStore.constructor.name).to.include('AWSElasticBlockStoreVolumeSource');
+            expect(subject.spec.awsElasticBlockStore.fsType).to.equal('type');
+            expect(subject.spec.awsElasticBlockStore.partition).to.equal('partition');
+            expect(subject.spec.awsElasticBlockStore.volumeID).to.equal('1');
+            expect(subject.spec.awsElasticBlockStore.readOnly).to.equal(true);
+        })
+
+        it('should correctly map persistent volume spec azure disk ', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.azureDisk.constructor.name).to.include('AzureDiskVolumeSource');
+            expect(subject.spec.azureDisk.fsType).to.equal('type');
+            expect(subject.spec.azureDisk.cachingMode).to.equal('mode');
+            expect(subject.spec.azureDisk.diskName).to.equal('disk-name');
+            expect(subject.spec.azureDisk.kind).to.equal('disk-kind');
+            expect(subject.spec.azureDisk.readOnly).to.equal(false);
+        })
+
+        it('should correctly map persistent volume spec azure file', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.azureFile.constructor.name).to.include('AzureFilePersistentVolumeSource');
+            expect(subject.spec.azureFile.secretName).to.equal('secret-name');
+            expect(subject.spec.azureFile.secretNamespace).to.equal('secret-namespace');
+            expect(subject.spec.azureFile.shareName).to.equal('share-name');
+            expect(subject.spec.azureFile.readOnly).to.equal(false);
+        })
+    })
+
+    describe('secret mapping', () => {
+
+        let parsedYaml;
+        beforeEach(() => {
+            parsedYaml = {
+                apiVersion: 'v1',
+                kind: 'Secret',
+                metadata: {
+                    name: 'secret-name'
+                },
+                data: {
+                    GRAPHQL_PATH: '/graphql',
+                    GRAPHQL_PORT: "4002",
+                    HELM_RELEASE_NAME: 'v1',
+                    NAMESPACE: 'development',
+                    NODE_ENV: 'development'
+                }
+            };
+        });
+
+        it('should correctly map to k8s client secret', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.constructor.name).to.include('Secret');
+            expect(subject.kind).to.equal('Secret');
+            expect(subject.apiVersion).to.equal('v1');
+        })
+
+        it('should correctly map data', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.data.GRAPHQL_PATH).to.equal('/graphql');
+            expect(subject.data.GRAPHQL_PORT).to.equal('4002');
+            expect(subject.data.HELM_RELEASE_NAME).to.equal('v1');
+            expect(subject.data.NAMESPACE).to.equal('development');
+            expect(subject.data.NODE_ENV).to.equal('development');
+        })
+
+    })
+
+    describe('config map mapping', () => {
+
+        let parsedYaml;
+        beforeEach(() => {
+            parsedYaml = {
+                apiVersion: 'v1',
+                kind: 'ConfigMap',
+                metadata: {
+                    name: 'config-map-name'
+                },
+                data: {
+                    GRAPHQL_PATH: '/graphql',
+                    GRAPHQL_PORT: "4002",
+                    HELM_RELEASE_NAME: 'v1',
+                    NAMESPACE: 'development',
+                    NODE_ENV: 'development'
+                }
+            };
+        });
+
+        it('should correctly map to k8s client config map', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.constructor.name).to.include('ConfigMap');
+            expect(subject.kind).to.equal('ConfigMap');
+            expect(subject.apiVersion).to.equal('v1');
+        })
+
+        it('should correctly map data', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.data.GRAPHQL_PATH).to.equal('/graphql');
+            expect(subject.data.GRAPHQL_PORT).to.equal('4002');
+            expect(subject.data.HELM_RELEASE_NAME).to.equal('v1');
+            expect(subject.data.NAMESPACE).to.equal('development');
+            expect(subject.data.NODE_ENV).to.equal('development');
+        })
+
+    })
+
     describe('metadata mapping', () => {
 
         let parsedYaml;

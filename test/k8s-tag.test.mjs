@@ -476,14 +476,7 @@ describe('k8s-tag', () => {
         apiVersion: v1
         kind: ConfigMap
         metadata:
-          annotations:
-            meta.helm.sh/release-name: v1
-            meta.helm.sh/release-namespace: development
-          creationTimestamp: "2022-03-08T15:46:18Z"
-          labels:
-            app.kubernetes.io/managed-by: Helm
-          name: v1-deep-microservice-collection-config-map
-          namespace: development
+          name: config-map-name
         data:
           GRAPHQL_PATH: /graphql
           GRAPHQL_PORT: "4002"
