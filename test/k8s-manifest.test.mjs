@@ -692,7 +692,31 @@ describe('k8s-manifest', () => {
                         readOnly: false,
                         secretName: 'secret-name',
                         secretNamespace: 'secret-namespace',
-                        shareName: 'share-name'
+                        shareName: 'share-name',
+                        random: '1'
+                    },
+                    cephfs: {
+                        monitors: [
+                            'monitor1',
+                            'monitor2'
+                        ],
+                        path: 'path',
+                        readOnly: true,
+                        secretFile: 'secret-file',
+                        user: 'user1',
+                        secretRef: {
+                            name: 'secret-name',
+                            namespace: 'secret-namespace'
+                        }
+                    },
+                    cinder: {
+                        volumeID: '1',
+                        readOnly: true,
+                        fsType: 'fs-type',
+                        secretRef: {
+                            name: 'secret-name',
+                            namespace: 'secret-namespace'
+                        }
                     },
                     capacity: {
                         storage: '8Gi'
@@ -709,7 +733,23 @@ describe('k8s-manifest', () => {
                         volumeAttributes: {
                             'storage.kubernetes.io/csiProvisionerIdentity': '1643213782115-8081-dobs.csi.digitalocean.com'
                         },
-                        volumeHandle: 'e72e4b60-9ef6-11ec-b54c-0a58ac14e15c'
+                        volumeHandle: 'e72e4b60-9ef6-11ec-b54c-0a58ac14e15c',
+                        controllerExpandSecretRef: {
+                            name: 'secret-name',
+                            namespace: 'secret-namespace'
+                        },
+                        controllerPublishSecretRef: {
+                            name: 'secret-name',
+                            namespace: 'secret-namespace'
+                        },
+                        nodePublishSecretRef: {
+                            name: 'secret-name',
+                            namespace: 'secret-namespace'
+                        },
+                        nodeStageSecretRef: {
+                            name: 'secret-name',
+                            namespace: 'secret-namespace'
+                        },
                     },
                     persistentVolumeReclaimPolicy: 'Delete',
                     storageClassName: 'do-block-storage',
@@ -780,6 +820,87 @@ describe('k8s-manifest', () => {
             expect(subject.spec.azureFile.secretNamespace).to.equal('secret-namespace');
             expect(subject.spec.azureFile.shareName).to.equal('share-name');
             expect(subject.spec.azureFile.readOnly).to.equal(false);
+        })
+
+        it('should correctly map persistent volume spec capacity', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.capacity.storage).to.equal('8Gi');
+        })
+
+        it('should correctly map persistent volume spec cephfs', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.cephfs.constructor.name).to.include('CephFSPersistentVolumeSource');
+            expect(Array.isArray(subject.spec.cephfs.monitors)).to.equal(true);
+            expect(subject.spec.cephfs.monitors[0]).to.equal('monitor1');
+            expect(subject.spec.cephfs.monitors[1]).to.equal('monitor2');
+            expect(subject.spec.cephfs.path).to.equal('path');
+            expect(subject.spec.cephfs.readOnly).to.equal(true);
+            expect(subject.spec.cephfs.secretFile).to.equal('secret-file');
+            expect(subject.spec.cephfs.user).to.equal('user1');
+
+            expect(subject.spec.cephfs.secretRef.constructor.name).to.include('SecretReference');
+            expect(subject.spec.cephfs.secretRef.name).to.equal('secret-name');
+            expect(subject.spec.cephfs.secretRef.namespace).to.equal('secret-namespace');
+        })
+
+        it('should correctly map persistent volume spec cinder', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.cinder.constructor.name).to.include('CinderPersistentVolumeSource');
+            expect(subject.spec.cinder.volumeID).to.equal('1');
+            expect(subject.spec.cinder.fsType).to.equal('fs-type');
+            expect(subject.spec.cinder.readOnly).to.equal(true);
+            expect(subject.spec.cinder.secretRef.constructor.name).to.include('SecretReference');
+            expect(subject.spec.cinder.secretRef.name).to.equal('secret-name');
+            expect(subject.spec.cinder.secretRef.namespace).to.equal('secret-namespace');
+        })
+
+        it('should correctly map persistent volume spec claim reference', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.claimRef.constructor.name).to.include('ObjectReference');
+            expect(subject.spec.claimRef.apiVersion).to.equal('v1');
+            expect(subject.spec.claimRef.kind).to.equal('PersistentVolumeClaim');
+            expect(subject.spec.claimRef.name).to.equal('v1-analysismongodb');
+            expect(subject.spec.claimRef.namespace).to.equal('development');
+        })
+
+        it('should correctly map persistent volume spec csi', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.csi.constructor.name).to.include('CSIPersistentVolumeSource');
+            expect(subject.spec.csi.driver).to.equal('dobs.csi.digitalocean.com');
+            expect(subject.spec.csi.fsType).to.equal('ext4');
+            expect(subject.spec.csi.volumeHandle).to.equal('e72e4b60-9ef6-11ec-b54c-0a58ac14e15c');
+            expect(subject.spec.csi.volumeAttributes['storage.kubernetes.io/csiProvisionerIdentity']).to.equal('1643213782115-8081-dobs.csi.digitalocean.com');
+
+            expect(subject.spec.csi.controllerExpandSecretRef.constructor.name).to.include('SecretReference');
+            expect(subject.spec.csi.controllerExpandSecretRef.name).to.equal('secret-name');
+            expect(subject.spec.csi.controllerExpandSecretRef.namespace).to.equal('secret-namespace');
+
+            expect(subject.spec.csi.controllerPublishSecretRef.constructor.name).to.include('SecretReference');
+            expect(subject.spec.csi.controllerPublishSecretRef.name).to.equal('secret-name');
+            expect(subject.spec.csi.controllerPublishSecretRef.namespace).to.equal('secret-namespace');
+
+            expect(subject.spec.csi.nodePublishSecretRef.constructor.name).to.include('SecretReference');
+            expect(subject.spec.csi.nodePublishSecretRef.name).to.equal('secret-name');
+            expect(subject.spec.csi.nodePublishSecretRef.namespace).to.equal('secret-namespace');
+
+            expect(subject.spec.csi.nodeStageSecretRef.constructor.name).to.include('SecretReference');
+            expect(subject.spec.csi.nodeStageSecretRef.name).to.equal('secret-name');
+            expect(subject.spec.csi.nodeStageSecretRef.namespace).to.equal('secret-namespace');
         })
     })
 

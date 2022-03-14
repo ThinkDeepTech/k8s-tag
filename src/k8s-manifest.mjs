@@ -1001,7 +1001,7 @@ class K8sManifest {
                 const subject = new k8s.V1SecretReference();
 
                 this._runTransform(value, (field, val) => {
-                    secretRef[field] = this._k8sClientObject(field, val[field]);
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
