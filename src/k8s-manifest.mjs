@@ -23,7 +23,7 @@ class K8sManifest {
             'persistentvolume:spec': (value) => {
                 const subject = new k8s.V1PersistentVolumeSpec();
 
-                subject.accessModes = this._k8sClientObject('type:array');
+                subject.accessModes = this._k8sClientObject('type:array', value['accessModes']);
                 subject.awsElasticBlockStore = this._k8sClientObject('aws:elastic:block:store', value['awsElasticBlockStore']);
                 subject.azureDisk = this._k8sClientObject('azure:disk', value['azureDisk']);
                 subject.azureFile = this._k8sClientObject('azure:file', value['azureFile']);
@@ -65,7 +65,6 @@ class K8sManifest {
                 }, ['labels', 'finalizers', 'managedFields']);
 
                 // TODO: Implement all fields
-
                 subject.labels = this._k8sClientObject('type:map', value['labels']);
                 subject.finalizers = this._k8sClientObject('type:array', value['finalizers']);
                 subject.managedFields = this._k8sClientObject('metadata:managed:fields', value['managedFields']);
@@ -1002,13 +1001,34 @@ class K8sManifest {
                 const subject = new k8s.V1SecretReference();
 
                 this._runTransform(value, (field, val) => {
-                    secretRef[field] = this._k8sClientObject(field, val[field]);
+                    subject[field] = this._k8sClientObject(field, val[field]);
                 });
 
                 return subject;
             },
             'creationtimestamp': (value) => {
                 return Date.parse(value) || null;
+            },
+            'deletiontimestamp': (value) => {
+                return Date.parse(value) || null;
+            },
+            'ownerreferences': (value) => {
+                let vals = [];
+
+                for (const entry of value) {
+                    vals.push(this._k8sClientObject('ownerreference', entry));
+                }
+
+                return vals;
+            },
+            'ownerreference': (value) => {
+                const subject = new k8s.V1OwnerReference();
+
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
+                });
+
+                return subject;
             },
             'httpget': (value) => {
                 const subject = new k8s.V1HTTPGetAction();
