@@ -751,6 +751,19 @@ describe('k8s-manifest', () => {
                             namespace: 'secret-namespace'
                         },
                     },
+                    fc: {
+                        fsType: 'fs-type',
+                        readOnly: true,
+                        lun: 1,
+                        targetWWNs: [
+                            'wwn1',
+                            'wwn2'
+                        ],
+                        wwids: [
+                            'wwid1',
+                            'wwid2'
+                        ]
+                    },
                     persistentVolumeReclaimPolicy: 'Delete',
                     storageClassName: 'do-block-storage',
                     volumeMode: 'Filesystem'
@@ -901,6 +914,25 @@ describe('k8s-manifest', () => {
             expect(subject.spec.csi.nodeStageSecretRef.constructor.name).to.include('SecretReference');
             expect(subject.spec.csi.nodeStageSecretRef.name).to.equal('secret-name');
             expect(subject.spec.csi.nodeStageSecretRef.namespace).to.equal('secret-namespace');
+        })
+
+        it('should correctly map persistent volume spec fc', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.fc.constructor.name).to.include('FCVolumeSource');
+            expect(subject.spec.fc.fsType).to.equal(parsedYaml.spec.fc.fsType);
+            expect(subject.spec.fc.readOnly).to.equal(parsedYaml.spec.fc.readOnly);
+            expect(subject.spec.fc.lun).to.equal(parsedYaml.spec.fc.lun);
+
+            expect(Array.isArray(subject.spec.fc.targetWWNs)).to.equal(true);
+            expect(subject.spec.fc.targetWWNs[0]).to.equal(parsedYaml.spec.fc.targetWWNs[0]);
+            expect(subject.spec.fc.targetWWNs[1]).to.equal(parsedYaml.spec.fc.targetWWNs[1]);
+
+            expect(Array.isArray(subject.spec.fc.wwids)).to.equal(true);
+            expect(subject.spec.fc.wwids[0]).to.equal(parsedYaml.spec.fc.wwids[0]);
+            expect(subject.spec.fc.wwids[1]).to.equal(parsedYaml.spec.fc.wwids[1]);
         })
     })
 
