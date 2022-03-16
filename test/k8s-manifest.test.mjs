@@ -21,6 +21,28 @@ describe('k8s-manifest', () => {
                         image: 'nginx',
                         command: ['/bin/bash'],
                         args: ['-c', 'echo "Hello"'],
+                        env: [{
+                            name: 'BITNAMI_DEBUG',
+                            value: "false"
+                        }, {
+                            name: 'MONGODB_SYSTEM_LOG_VERBOSITY',
+                            value: "0"
+                        }, {
+                            name: 'MONGODB_DISABLE_SYSTEM_LOG',
+                            value: "no"
+                        }, {
+                            name: 'MONGODB_DISABLE_JAVASCRIPT',
+                            value: "no"
+                        }, {
+                            name: 'MONGODB_ENABLE_JOURNAL',
+                            value: "yes"
+                        }, {
+                            name: 'MONGODB_ENABLE_IPV6',
+                            value: "no"
+                        }, {
+                            name: 'MONGODB_ENABLE_DIRECTORY_PER_DB',
+                            value: "no"
+                        }],
                         envFrom: [{
                             configMapRef: {
                                 name: 'config-map'
@@ -165,6 +187,22 @@ describe('k8s-manifest', () => {
             expect(Array.isArray(subject.spec.containers[0].args)).to.equal(true);
             expect(subject.spec.containers[0].args[0]).to.equal('-c');
             expect(subject.spec.containers[0].args[1]).to.equal('echo "Hello"');
+        })
+
+        it('should correctly map env', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(Array.isArray(subject.spec.containers[0].env)).to.equal(true);
+            expect(subject.spec.containers[0].env[0].constructor.name).to.include('EnvVar');
+            expect(subject.spec.containers[0].env[0].name).to.equal(parsedYaml.spec.containers[0].env[0].name);
+            expect(subject.spec.containers[0].env[1].name).to.equal(parsedYaml.spec.containers[0].env[1].name);
+            expect(subject.spec.containers[0].env[2].name).to.equal(parsedYaml.spec.containers[0].env[2].name);
+            expect(subject.spec.containers[0].env[0].value).to.equal(parsedYaml.spec.containers[0].env[0].value);
+            expect(subject.spec.containers[0].env[1].value).to.equal(parsedYaml.spec.containers[0].env[1].value);
+            expect(subject.spec.containers[0].env[2].value).to.equal(parsedYaml.spec.containers[0].env[2].value);
+            expect(subject.spec.containers[0].env.length).to.equal(7);
         })
 
         it('should correctly map envFrom', () => {
@@ -933,6 +971,132 @@ describe('k8s-manifest', () => {
             expect(Array.isArray(subject.spec.fc.wwids)).to.equal(true);
             expect(subject.spec.fc.wwids[0]).to.equal(parsedYaml.spec.fc.wwids[0]);
             expect(subject.spec.fc.wwids[1]).to.equal(parsedYaml.spec.fc.wwids[1]);
+        })
+    })
+
+    describe('persistent volume claim mapping', () => {
+
+        let parsedYaml;
+        beforeEach(() => {
+            parsedYaml = {
+                apiVersion: 'v1',
+                kind: 'PersistentVolumeClaim',
+                metadata: {
+                    annotations: {
+                        'pv.kubernetes.io/bind-completed': "yes",
+                        'pv.kubernetes.io/bound-by-controller': "yes",
+                        'volume.beta.kubernetes.io/storage-provisioner': 'dobs.csi.digitalocean.com'
+                    },
+                    creationTimestamp: "2022-03-08T15:46:18Z",
+                    finalizers: [
+                        'kubernetes.io/pvc-protection'
+                    ],
+                    labels: {
+                        "app.kubernetes.io/component": 'kafka',
+                        'app.kubernetes.io/instance': 'v1',
+                        'app.kubernetes.io/name': 'kafka'
+                    },
+                    'name': 'data-v1-kafka-0',
+                    'namespace': 'development'
+                },
+                spec: {
+                    accessModes: [
+                        'ReadWriteOnce'
+                    ],
+                    selector: {
+                        matchLabels: {
+                            app: 'application-deployment'
+                        }
+                    },
+                    resources: {
+                        requests: {
+                            storage: '8Gi'
+                        }
+                    },
+                    storageClassName: 'do-block-storage',
+                    volumeMode: 'Filesystem',
+                    volumeName: 'pvc-e5b00b9f-92c8-468c-b830-889fb13e3d4a'
+                },
+                status: {
+                    accessModes: [
+                        'ReadWriteOnce'
+                    ],
+                    capacity: {
+                        storage: '8Gi'
+                    },
+                    phase: 'Bound'
+                }
+            };
+        });
+
+        it('should correctly map to k8s client persistent volume claim', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.constructor.name).to.include('PersistentVolumeClaim');
+            expect(subject.kind).to.equal('PersistentVolumeClaim');
+            expect(subject.apiVersion).to.equal('v1');
+        })
+
+        it('should correctly map persistent volume claim spec', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.constructor.name).to.include('PersistentVolumeClaimSpec');
+        })
+
+        it('should correctly map persistent volume claim spec access modes', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(Array.isArray(subject.spec.accessModes)).to.equal(true);
+            expect(subject.spec.accessModes[0]).to.equal(parsedYaml.spec.accessModes[0]);
+        })
+
+        it('should correctly map persistent volume claim spec selector', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.selector.constructor.name).to.include('LabelSelector');
+            expect(subject.spec.selector.matchLabels.app).to.equal(parsedYaml.spec.selector.matchLabels.app);
+        })
+
+        it('should correctly map persistent volume claim spec resources', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.resources.constructor.name).to.include('ResourceRequirements');
+            expect(subject.spec.resources.requests.storage).to.equal(parsedYaml.spec.resources.requests.storage);
+        })
+
+        it('should correctly map string fields', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.storageClassName).to.equal(parsedYaml.spec.storageClassName);
+        })
+
+        it('should correctly map persistent volume claim status', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.status.constructor.name).to.include('PersistentVolumeClaimStatus');
+        })
+
+        it('should correctly map persistent volume claim status access modes', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(Array.isArray(subject.status.accessModes)).to.equal(true);
+            expect(subject.status.accessModes[0]).to.equal(parsedYaml.status.accessModes[0]);
         })
     })
 
