@@ -535,6 +535,53 @@ describe('k8s-tag', () => {
 
         const actual = subject._manifest._obj;
 
-        // console.log(subject.toString());
+        expect(actual.constructor.name).to.include('PersistentVolume');
+        expect(actual.spec.constructor.name).to.include('PersistentVolumeSpec');
     })
+
+    it('should correctly map kind PersistentVolumeClaim to a k8s client object', () => {
+        const subject = k8s`
+        apiVersion: v1
+        kind: PersistentVolumeClaim
+        metadata:
+          annotations:
+            pv.kubernetes.io/bind-completed: "yes"
+            pv.kubernetes.io/bound-by-controller: "yes"
+            volume.beta.kubernetes.io/storage-provisioner: dobs.csi.digitalocean.com
+          creationTimestamp: "2022-03-08T15:46:18Z"
+          finalizers:
+          - kubernetes.io/pvc-protection
+          labels:
+            app.kubernetes.io/component: kafka
+            app.kubernetes.io/instance: v1
+            app.kubernetes.io/name: kafka
+          name: data-v1-kafka-0
+          namespace: development
+          resourceVersion: "9930884"
+          uid: e5b00b9f-92c8-468c-b830-889fb13e3d4a
+        spec:
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: 8Gi
+          storageClassName: do-block-storage
+          volumeMode: Filesystem
+          volumeName: pvc-e5b00b9f-92c8-468c-b830-889fb13e3d4a
+        status:
+          accessModes:
+          - ReadWriteOnce
+          capacity:
+            storage: 8Gi
+          phase: Bound
+
+        `;
+
+        const actual = subject._manifest._obj;
+
+        expect(actual.constructor.name).to.include('PersistentVolumeClaim');
+        expect(actual.spec.constructor.name).to.include('PersistentVolumeClaimSpec');
+    })
+
+
 })

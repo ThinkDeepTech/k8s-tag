@@ -8,6 +8,61 @@ class K8sManifest {
             throw new Error(`The parsed yaml couldn't be used to construct a k8s object.\n${yaml.stringify(parsedYaml)}`);
 
         this._fieldMap = {
+            'persistentvolumeclaim': (value) => {
+                const subject = new k8s.V1PersistentVolumeClaim();
+
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
+                }, ['spec', 'status']);
+
+                subject['spec'] = this._k8sClientObject('persistentvolumeclaim:spec', value['spec']);
+                subject['status'] = this._k8sClientObject('persistentvolumeclaim:status', value['status']);
+
+                return subject;
+            },
+            'persistentvolumeclaim:spec': (value) => {
+                const subject = new k8s.V1PersistentVolumeClaimSpec();
+
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
+                }, ['accessModes', 'selector']);
+
+                subject.accessModes = this._k8sClientObject('type:array', value['accessModes']);
+                subject.selector = this._k8sClientObject('label:selector', value['selector']);
+
+                return subject;
+            },
+            'persistentvolumeclaim:status': (value) => {
+                const subject = new k8s.V1PersistentVolumeClaimStatus();
+
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
+                }, ['accessModes', 'capacity', 'conditions']);
+
+                subject.accessModes = this._k8sClientObject('type:array', value['accessModes']);
+                subject.capacity = this._k8sClientObject('type:map', value['capacity']);
+                subject.conditions = this._k8sClientObject('persistentvolumeclaim:conditions');
+
+                return subject;
+            },
+            'persistentvolumeclaim:conditions': (value) => {
+                let vals = [];
+
+                for (const entry of value) {
+                    vals.push(this._k8sClientObject('persistentvolumeclaim:condition', entry));
+                }
+
+                return vals;
+            },
+            'persistentvolumeclaim:condition': (value) => {
+                const subject = new k8s.V1PersistentVolumeClaimCondition();
+
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
+                });
+
+                return subject;
+            },
             'persistentvolume': (value) => {
                 const subject = new k8s.V1PersistentVolume();
 
@@ -16,7 +71,8 @@ class K8sManifest {
                 }, ['spec', 'status']);
 
                 subject['spec'] = this._k8sClientObject('persistentvolume:spec', value['spec']);
-                subject['status'] = this._k8sClientObject('persistentvolume:spec', value['status']);
+                // TODO:
+                // subject['status'] = this._k8sClientObject('persistentvolume:status', value['status']);
 
                 return subject;
             },
@@ -1153,6 +1209,15 @@ class K8sManifest {
             },
             'stringData': (value) => {
                 return this._k8sClientObject('type:map', value);
+            },
+            'datasource': (value) => {
+                const subject = new k8s.V1TypedLocalObjectReference();
+
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
+                });
+
+                return subject;
             },
             'type:array': (value) => {
                 let vals = []

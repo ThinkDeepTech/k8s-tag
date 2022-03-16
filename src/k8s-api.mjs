@@ -54,6 +54,10 @@ class K8sApi {
                 console.log(`Using persistent volume creation strategy for \n${manifest.toString()}\n`);
                 return this._api.createPersistentVolume.bind(this._api, manifest.k8sClientObject());
             }
+            case 'PersistentVolumeClaim': {
+                console.log(`Using persistent volume claim creation strategy for \n${manifest.toString()}\n`);
+                return this._api.createNamespacedPersistentVolumeClaim().bind(this._api, manifest.metadata().namespace, manifest.k8sClientObject());
+            }
             default: {
                 throw new Error(`K8s manifest kind not yet supported. Received: ${manifest.kind()}`);
             }
@@ -98,6 +102,10 @@ class K8sApi {
             case 'PersistentVolume': {
                 console.log(`Using persistent volume deletion strategy for \n${manifest.toString()}\n`);
                 return this._api.deletePersistentVolume.bind(this._api, manifest.metadata().name);
+            }
+            case 'PersistentVolumeClaim': {
+                console.log(`Using persistent volume claim deletion strategy for \n${manifest.toString()}\n`);
+                return this._api.deleteNamespacedPersistentVolumeClaim.bind(this._api, manifest.metadata().name, manifest.metadata().namespace);
             }
             default: {
                 throw new Error(`K8s manifest kind not yet supported. Received: ${manifest.kind()}`);
