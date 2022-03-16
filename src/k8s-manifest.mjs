@@ -71,7 +71,6 @@ class K8sManifest {
                 }, ['spec', 'status']);
 
                 subject['spec'] = this._k8sClientObject('persistentvolume:spec', value['spec']);
-                // TODO:
                 // subject['status'] = this._k8sClientObject('persistentvolume:status', value['status']);
 
                 return subject;
@@ -1121,6 +1120,15 @@ class K8sManifest {
                 return subject;
             },
             'env': (value) => {
+                let vals = [];
+
+                for (const entry of value) {
+                    vals.push(this._k8sClientObject('env:variable', entry));
+                }
+
+                return vals;
+            },
+            'env:variable': (value) => {
                 const subject = new k8s.V1EnvVar();
 
                 this._runTransform(value, (field, val) => {

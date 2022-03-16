@@ -21,6 +21,28 @@ describe('k8s-manifest', () => {
                         image: 'nginx',
                         command: ['/bin/bash'],
                         args: ['-c', 'echo "Hello"'],
+                        env: [{
+                            name: 'BITNAMI_DEBUG',
+                            value: "false"
+                        }, {
+                            name: 'MONGODB_SYSTEM_LOG_VERBOSITY',
+                            value: "0"
+                        }, {
+                            name: 'MONGODB_DISABLE_SYSTEM_LOG',
+                            value: "no"
+                        }, {
+                            name: 'MONGODB_DISABLE_JAVASCRIPT',
+                            value: "no"
+                        }, {
+                            name: 'MONGODB_ENABLE_JOURNAL',
+                            value: "yes"
+                        }, {
+                            name: 'MONGODB_ENABLE_IPV6',
+                            value: "no"
+                        }, {
+                            name: 'MONGODB_ENABLE_DIRECTORY_PER_DB',
+                            value: "no"
+                        }],
                         envFrom: [{
                             configMapRef: {
                                 name: 'config-map'
@@ -165,6 +187,22 @@ describe('k8s-manifest', () => {
             expect(Array.isArray(subject.spec.containers[0].args)).to.equal(true);
             expect(subject.spec.containers[0].args[0]).to.equal('-c');
             expect(subject.spec.containers[0].args[1]).to.equal('echo "Hello"');
+        })
+
+        it('should correctly map env', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(Array.isArray(subject.spec.containers[0].env)).to.equal(true);
+            expect(subject.spec.containers[0].env[0].constructor.name).to.include('EnvVar');
+            expect(subject.spec.containers[0].env[0].name).to.equal(parsedYaml.spec.containers[0].env[0].name);
+            expect(subject.spec.containers[0].env[1].name).to.equal(parsedYaml.spec.containers[0].env[1].name);
+            expect(subject.spec.containers[0].env[2].name).to.equal(parsedYaml.spec.containers[0].env[2].name);
+            expect(subject.spec.containers[0].env[0].value).to.equal(parsedYaml.spec.containers[0].env[0].value);
+            expect(subject.spec.containers[0].env[1].value).to.equal(parsedYaml.spec.containers[0].env[1].value);
+            expect(subject.spec.containers[0].env[2].value).to.equal(parsedYaml.spec.containers[0].env[2].value);
+            expect(subject.spec.containers[0].env.length).to.equal(7);
         })
 
         it('should correctly map envFrom', () => {

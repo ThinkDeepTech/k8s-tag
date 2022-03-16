@@ -557,8 +557,6 @@ describe('k8s-tag', () => {
             app.kubernetes.io/name: kafka
           name: data-v1-kafka-0
           namespace: development
-          resourceVersion: "9930884"
-          uid: e5b00b9f-92c8-468c-b830-889fb13e3d4a
         spec:
           accessModes:
           - ReadWriteOnce
@@ -574,7 +572,6 @@ describe('k8s-tag', () => {
           capacity:
             storage: 8Gi
           phase: Bound
-
         `;
 
         const actual = subject._manifest._obj;
