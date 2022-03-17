@@ -78,36 +78,40 @@ class K8sManifest {
             'persistentvolume:spec': (value) => {
                 const subject = new k8s.V1PersistentVolumeSpec();
 
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
+                }, ['accessModes', 'capacity', 'mountOptions', 'local']);
+
                 subject.accessModes = this._k8sClientObject('type:array', value['accessModes']);
-                subject.awsElasticBlockStore = this._k8sClientObject('aws:elastic:block:store', value['awsElasticBlockStore']);
-                subject.azureDisk = this._k8sClientObject('azure:disk', value['azureDisk']);
-                subject.azureFile = this._k8sClientObject('azure:file', value['azureFile']);
+                // subject.awsElasticBlockStore = this._k8sClientObject('aws:elastic:block:store', value['awsElasticBlockStore']);
+                // subject.azureDisk = this._k8sClientObject('azure:disk', value['azureDisk']);
+                // subject.azureFile = this._k8sClientObject('azure:file', value['azureFile']);
                 subject.capacity = this._k8sClientObject('type:map', value['capacity']);
-                subject.cephfs = this._k8sClientObject('cephfs', value['cephfs']);
-                subject.cinder = this._k8sClientObject('cinder', value['cinder']);
-                subject.claimRef = this._k8sClientObject('claimref', value['claimRef']);
-                subject.csi = this._k8sClientObject('csi', value['csi']);
-                subject.fc = this._k8sClientObject('fc', value['fc']);
-                subject.flexVolume = this._k8sClientObject('flexvolume', value['flexVolume']);
-                subject.flocker = this._k8sClientObject('flocker', value['flocker']);
-                subject.gcePersistentDisk = this._k8sClientObject('gce:persistent:disk', value['gcePersistentDisk']);
-                subject.glusterfs = this._k8sClientObject('glusterfs', value['glusterfs']);
-                subject.hostPath = this._k8sClientObject('hostpath', value['hostPath']);
-                subject.iscsi = this._k8sClientObject('iscsi', value['iscsi']);
+                // subject.cephfs = this._k8sClientObject('cephfs', value['cephfs']);
+                // subject.cinder = this._k8sClientObject('cinder', value['cinder']);
+                // subject.claimRef = this._k8sClientObject('claimref', value['claimRef']);
+                // subject.csi = this._k8sClientObject('csi', value['csi']);
+                // subject.fc = this._k8sClientObject('fc', value['fc']);
+                // subject.flexVolume = this._k8sClientObject('flexvolume', value['flexVolume']);
+                // subject.flocker = this._k8sClientObject('flocker', value['flocker']);
+                // subject.gcePersistentDisk = this._k8sClientObject('gce:persistent:disk', value['gcePersistentDisk']);
+                // subject.glusterfs = this._k8sClientObject('glusterfs', value['glusterfs']);
+                // subject.hostPath = this._k8sClientObject('hostpath', value['hostPath']);
+                // subject.iscsi = this._k8sClientObject('iscsi', value['iscsi']);
                 subject.local = this._k8sClientObject('local:volume:store', value['local']);
                 subject.mountOptions = this._k8sClientObject('type:array', value['mountOptions']);
-                subject.nfs = this._k8sClientObject('nfs', value['nfs']);
-                subject.nodeAffinity = this._k8sClientObject('nodeaffinity', value['nodeAffinity']);
-                subject.persistentVolumeReclaimPolicy = this._k8sClientObject('persistentvolumereclaimpolicy', value['persistentVolumeReclaimPolicy']);
-                subject.photonPersistentDisk = this._k8sClientObject('photon:persistent:disk', value['photonPersistentDisk']);
-                subject.portworxVolume = this._k8sClientObject('portworxvolume', value['portworxVolume']);
-                subject.quobyte = this._k8sClientObject('quobyte', value['quobyte']);
-                subject.rbd = this._k8sClientObject('rbd', value['rbd']);
-                subject.scaleIO = this._k8sClientObject('scaleio', value['scaleIO']);
-                subject.storageClassName = this._k8sClientObject('storageclassname', value['storageClassName']);
-                subject.storageos = this._k8sClientObject('storageos', value['storageos']);
-                subject.volumeMode = this._k8sClientObject('volumemode', value['volumeMode']);
-                subject.vsphereVolume = this._k8sClientObject('vspherevolume', value['vsphereVolume']);
+                // subject.nfs = this._k8sClientObject('nfs', value['nfs']);
+                // subject.nodeAffinity = this._k8sClientObject('nodeaffinity', value['nodeAffinity']);
+                // subject.persistentVolumeReclaimPolicy = this._k8sClientObject('persistentvolumereclaimpolicy', value['persistentVolumeReclaimPolicy']);
+                // subject.photonPersistentDisk = this._k8sClientObject('photon:persistent:disk', value['photonPersistentDisk']);
+                // subject.portworxVolume = this._k8sClientObject('portworxvolume', value['portworxVolume']);
+                // subject.quobyte = this._k8sClientObject('quobyte', value['quobyte']);
+                // subject.rbd = this._k8sClientObject('rbd', value['rbd']);
+                // subject.scaleIO = this._k8sClientObject('scaleio', value['scaleIO']);
+                // subject.storageClassName = this._k8sClientObject('storageclassname', value['storageClassName']);
+                // subject.storageos = this._k8sClientObject('storageos', value['storageos']);
+                // subject.volumeMode = this._k8sClientObject('volumemode', value['volumeMode']);
+                // subject.vsphereVolume = this._k8sClientObject('vspherevolume', value['vsphereVolume']);
 
                 return subject;
             },
@@ -120,6 +124,7 @@ class K8sManifest {
                 }, ['labels', 'finalizers', 'managedFields']);
 
                 // TODO: Implement all fields
+
                 subject.labels = this._k8sClientObject('type:map', value['labels']);
                 subject.finalizers = this._k8sClientObject('type:array', value['finalizers']);
                 subject.managedFields = this._k8sClientObject('metadata:managed:fields', value['managedFields']);
@@ -409,6 +414,8 @@ class K8sManifest {
                 subject['topologyKeys'] = this._k8sClientObject('type:array', value['topologyKeys']);
                 subject['ports'] = this._k8sClientObject('service:ports', value['ports']);
 
+
+
                 return subject;
             },
             'service:ports': (value) => {
@@ -498,7 +505,6 @@ class K8sManifest {
                 const subject = new k8s.V1LabelSelectorRequirement();
 
                 this._runTransform(value, (field, val) => {
-                    console.log(`field ${field}, val ${val}`);
                     subject[field] = this._k8sClientObject(field, val[field]);
                 }, ['values']);
 
@@ -506,7 +512,7 @@ class K8sManifest {
 
                 return subject;
             },
-            'aws:elastic:block:store': (value) => {
+            'awselasticblockstore': (value) => {
                 const subject = new k8s.V1AWSElasticBlockStoreVolumeSource();
 
                 this._runTransform(value, (field, val) => {
@@ -515,7 +521,7 @@ class K8sManifest {
 
                 return subject;
             },
-            'azure:disk': (value) => {
+            'azuredisk': (value) => {
                 const subject = new k8s.V1AzureDiskVolumeSource();
 
                 this._runTransform(value, (field, val) => {
@@ -524,7 +530,7 @@ class K8sManifest {
 
                 return subject;
             },
-            'azure:file': (value) => {
+            'azurefile': (value) => {
                 const subject = new k8s.V1AzureFilePersistentVolumeSource();
 
                 this._runTransform(value, (field, val) => {
@@ -615,7 +621,7 @@ class K8sManifest {
 
                 return subject;
             },
-            'gce:persistent:disk': (value) => {
+            'gcepersistentdisk': (value) => {
                 const subject = new k8s.V1GCEPersistentDiskVolumeSource();
 
                 this._runTransform(value, (field, val) => {
@@ -624,7 +630,7 @@ class K8sManifest {
 
                 return subject;
             },
-            'photon:persistent:disk': (value) => {
+            'photonpersistentdisk': (value) => {
                 const subject = new k8s.V1PhotonPersistentDiskVolumeSource();
 
                 this._runTransform(value, (field, val) => {
@@ -676,6 +682,153 @@ class K8sManifest {
             },
             'vspherevolume': (value) => {
                 const subject = new k8s.V1VsphereVirtualDiskVolumeSource();
+
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
+                });
+
+                return subject;
+            },
+            'volumes': (value) => {
+                let vals = [];
+
+                for (const entry of value) {
+                    vals.push(this._k8sClientObject('volume', entry));
+                }
+
+                return vals;
+            },
+            'volume': (value) => {
+                const subject = new k8s.V1Volume();
+
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
+                }, ['configMap', 'persistentVolumeClaim', 'secret']);
+
+                subject.configMap = this._k8sClientObject('configmap:volume:source', value['configMap']);
+                subject.persistentVolumeClaim = this._k8sClientObject('persistentvolumeclaim:volume:source', value['persistentVolumeClaim']);
+                subject.secret = this._k8sClientObject('secret:volume:source', value['secret']);
+
+                return subject;
+            },
+            'secret': (value) => {
+                const subject = new k8s.V1SecretVolumeSource();
+
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
+                }, ['items']);
+
+                subject.items = this._k8sClientObject('items:keytopath', value['items']);
+
+                return subject;
+            },
+            'gitrepo': (value) => {
+                const subject = new k8s.V1GitRepoVolumeSource();
+
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
+                });
+
+                return subject;
+            },
+            'ephemeral': (value) => {
+                const subject = new k8s.V1EphemeralVolumeSource();
+
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
+                });
+
+                return subject;
+            },
+            'volumeclaimtemplate': (value) => {
+                const subject = new k8s.V1PersistentVolumeClaimTemplate();
+
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
+                }, ['spec']);
+
+                subject.spec = this._k8sClientObject('persistentvolumeclaim:spec', value['spec']);
+
+                return subject;
+            },
+            'emptydir': (value) => {
+                const subject = new k8s.V1EmptyDirVolumeSource();
+
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
+                });
+
+                return subject;
+            },
+            'downwardapi': (value) => {
+                const subject = new k8s.V1DownwardAPIVolumeSource();
+
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
+                }, ['items']);
+
+                subject.items = this._k8sClientObject('downwardapi:items', value['items']);
+
+                return subject;
+            },
+            'downwardapi:items': (value) => {
+                let vals = [];
+
+                for (const entry of value) {
+                    vals.push(this._k8sClientObject('downwardapivolumefile', entry));
+                }
+
+                return vals;
+            },
+            'downwardapivolumefile': (value) => {
+                const subject = new k8s.V1DownwardAPIVolumeFile();
+
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
+                });
+
+                return subject;
+            },
+            'resourcefieldref': (value) => {
+                const subject = new k8s.V1ResourceFieldSelector();
+
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
+                });
+
+                return subject;
+            },
+            'fieldref': (value) => {
+                const subject = new k8s.V1ObjectFieldSelector();
+
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
+                });
+
+                return subject;
+            },
+            'configmap:volume:source': (value) => {
+                const subject = new k8s.V1ConfigMapVolumeSource();
+
+                this._runTransform(value, (field, val) => {
+                    subject[field] = this._k8sClientObject(field, val[field]);
+                }, ['items']);
+
+                subject.items = this._k8sClientObject('items:keytopath', value['items']);
+
+                return subject;
+            },
+            'items:keytopath': (value) => {
+                let vals = [];
+
+                for (const entry of value) {
+                    vals.push(this._k8sClientObject('keytopath', entry));
+                }
+
+                return vals;
+            },
+            'keytopath': (value) => {
+                const subject = new k8s.V1KeyToPath();
 
                 this._runTransform(value, (field, val) => {
                     subject[field] = this._k8sClientObject(field, val[field]);

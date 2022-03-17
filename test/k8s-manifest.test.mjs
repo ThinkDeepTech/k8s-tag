@@ -82,7 +82,11 @@ describe('k8s-manifest', () => {
                             },
                             failureThreshold: 30,
                             periodSeconds: 10
-                        }
+                        },
+                        volumeMounts: [{
+                            mountPath: '/test-ebs',
+                            name: 'test-volume'
+                        }]
                     }]
                 }
             };
@@ -156,6 +160,17 @@ describe('k8s-manifest', () => {
             expect(subject.spec.containers[0].ports[0].name).to.equal('liveness-port');
             expect(subject.spec.containers[0].ports[0].containerPort).to.equal(8080);
             expect(subject.spec.containers[0].ports[0].hostPort).to.equal(8080);
+        })
+
+        it('should correctly map volume mounts', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(Array.isArray(subject.spec.containers[0].volumeMounts)).to.equal(true);
+            expect(subject.spec.containers[0].volumeMounts[0].constructor.name).to.include('VolumeMount');
+            expect(subject.spec.containers[0].volumeMounts[0].name).to.equal(parsedYaml.spec.containers[0].volumeMounts[0].name);
+            expect(subject.spec.containers[0].volumeMounts[0].mountPath).to.equal(parsedYaml.spec.containers[0].volumeMounts[0].mountPath);
         })
 
         it('should correctly map resources', () => {
@@ -251,7 +266,15 @@ describe('k8s-manifest', () => {
                     securityContext: {},
                     serviceAccount: "service-account",
                     serviceAccountName: "service-account-name",
-                    terminationGracePeriodSeconds: 30
+                    terminationGracePeriodSeconds: 30,
+                    volumes: [{
+                        name: 'test-volume',
+                        // This AWS EBS volume must already exist.
+                        awsElasticBlockStore: {
+                            volumeID: "<volume id>",
+                            fsType: 'ext4'
+                        }
+                    }]
                 }
             };
         });

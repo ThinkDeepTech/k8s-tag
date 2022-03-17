@@ -394,7 +394,24 @@ describe('k8s-tag', () => {
                         app: ${options.appLabel}
                 spec:
                     containers:
-                        - envFrom:
+                        - env:
+                            - name: BITNAMI_DEBUG
+                              value: "false"
+                            - name: ALLOW_EMPTY_PASSWORD
+                              value: "yes"
+                            - name: MONGODB_SYSTEM_LOG_VERBOSITY
+                              value: "0"
+                            - name: MONGODB_DISABLE_SYSTEM_LOG
+                              value: "no"
+                            - name: MONGODB_DISABLE_JAVASCRIPT
+                              value: "no"
+                            - name: MONGODB_ENABLE_JOURNAL
+                              value: "yes"
+                            - name: MONGODB_ENABLE_IPV6
+                              value: "no"
+                            - name: MONGODB_ENABLE_DIRECTORY_PER_DB
+                              value: "no"
+                          envFrom:
                             - configMapRef:
                                 name: ${options.configMap}
                             - secretRef:
@@ -444,6 +461,10 @@ describe('k8s-tag', () => {
 
         expect(actual.constructor.name).to.include('Deployment');
         expect(actual.spec.constructor.name).to.include('DeploymentSpec');
+        expect(Array.isArray(actual.spec.template.spec.containers[0].env)).to.equal(true);
+        expect(actual.spec.template.spec.containers[0].env[0].constructor.name).to.include('EnvVar');
+        expect(actual.spec.template.spec.containers[0].env[0].name).to.equal('BITNAMI_DEBUG');
+        expect(actual.spec.template.spec.containers[0].env[0].value).to.equal('false');
     })
 
     it('should correctly map kind namespace to a k8s client object', () => {
