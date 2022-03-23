@@ -35,7 +35,6 @@ class K8sManifest {
         if (typeName === 'Date')
             return Date.parse(value) || null;
 
-        let subject = null;
         if (typeName.includes('Array')) {
 
             return this._handleArrayType(typeName, value);
