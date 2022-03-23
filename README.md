@@ -5,11 +5,6 @@ Tag function allowing interaction with the kubernetes node client through yaml c
 - [Kubernetes javascript client](https://github.com/kubernetes-client/javascript) v0.15
 - Tested on Node v16.13.1
 
-# Issues
-This project is actively being developed so many k8s objects aren't currently supported. If you experience issues
-please submit an issue [here](https://github.com/ThinkDeepTech/k8s-tag/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc)
-so that I can focus my efforts where there are needs.
-
 # Usage
 The goal of this project is to abstract out the complexity of the [Kubernetes javascript client](https://github.com/kubernetes-client/javascript). Readability is improved by automating construction of K8s client objects that are hard
 to mentally map to the equivalent yaml configuration. Instead, a yaml configuration is applied using the k8s tag which
@@ -39,7 +34,7 @@ const job = k8s`
                 containers:
                     - name: "${process.env.HELM_RELEASE_NAME}-data-collector"
                       image: "${options.image}"
-                      command: "${options.command}"
+                      command: ${options.command}
                       args: ${options.args}
                       envFrom:
                       - secretRef:
