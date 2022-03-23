@@ -730,8 +730,7 @@ describe('k8s-manifest', () => {
                         readOnly: false,
                         secretName: 'secret-name',
                         secretNamespace: 'secret-namespace',
-                        shareName: 'share-name',
-                        random: '1'
+                        shareName: 'share-name'
                     },
                     cephfs: {
                         monitors: [
