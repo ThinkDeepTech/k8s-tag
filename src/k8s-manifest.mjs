@@ -8,14 +8,14 @@ class K8sManifest {
             throw new Error(`The parsed yaml couldn't be used to construct a k8s object.\n${yaml.stringify(parsedYaml)}`);
 
         this._yaml = parsedYaml;
-        this._obj = this._k8sClientObject(`V1${this._yaml.kind}`, this._yaml);
+        this._obj = this._k8sClientObject(`${this._objectVersion(this._yaml.apiVersion)}${this._yaml.kind}`, this._yaml);
     }
 
-    kind() {
+    get kind() {
         return this._obj.kind;
     }
 
-    metadata() {
+    get metadata() {
         return this._obj.metadata;
     }
 
@@ -131,6 +131,21 @@ class K8sManifest {
         }
 
         return subject;
+    }
+
+    _objectVersion(apiVersion) {
+        if (!apiVersion.includes('/')) {
+            return this._capitalizeFirstLetter(apiVersion);
+        } else {
+
+            const parts = apiVersion.split('/');
+            const lastPart = parts[parts.length - 1];
+            return this._capitalizeFirstLetter(lastPart);
+        }
+    }
+
+    _capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
     }
 
     _emptyMap(map) {
