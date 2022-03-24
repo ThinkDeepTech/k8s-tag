@@ -1199,9 +1199,9 @@ describe('k8s-manifest', () => {
                         'deployment.kubernetes.io/revision': 1,
                         'meta.helm.sh/release-name': 'v1',
                         'meta.helm.sh/release-namespace': 'development',
-                        creationTimestamp: "2022-03-08T15:46:18Z",
-                        generation: 1,
                     },
+                    creationTimestamp: "2022-03-08T15:46:18Z",
+                    generation: 1,
                     labels: {
                         app: 'application-label',
                         'app.kubernetes.io/managed-by': 'Helm'
@@ -1234,8 +1234,15 @@ describe('k8s-manifest', () => {
             expect(subject.metadata.annotations['deployment.kubernetes.io/revision']).to.equal(1);
             expect(subject.metadata.annotations['meta.helm.sh/release-name']).to.equal('v1');
             expect(subject.metadata.annotations['meta.helm.sh/release-namespace']).to.equal('development');
-            expect(subject.metadata.annotations['creationTimestamp']).to.equal('2022-03-08T15:46:18Z');
-            expect(subject.metadata.annotations['generation']).to.equal(1);
+        })
+
+        it('should correctly map dates', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.metadata['creationTimestamp'].toISOString()).to.include('2022-03-08T15:46:18');
+            expect(subject.metadata['creationTimestamp'].constructor.name).to.equal('Date');
         })
 
         it('should correctly map labels', () => {
