@@ -17,100 +17,38 @@ class K8sApi {
 
     _creationStrategy(manifest) {
 
-        switch(manifest.kind()) {
-            case 'CronJob': {
-                console.log(`Using cron job creation strategy for \n${manifest.toString()}\n`);
-                return this._api.createNamespacedCronJob.bind(this._api, manifest.metadata().namespace, manifest.k8sClientObject());
-            }
-            case 'Job': {
-                console.log(`Using job creation strategy for \n${manifest.toString()}\n`);
-                return this._api.createNamespacedJob.bind(this._api, manifest.metadata().namespace, manifest.k8sClientObject());
-            }
-            case 'Pod': {
-                console.log(`Using pod creation strategy for \n${manifest.toString()}\n`);
-                return this._api.createNamespacedPod.bind(this._api, manifest.metadata().namespace, manifest.k8sClientObject());
-            }
-            case 'Secret': {
-                console.log(`Using secret creation strategy for \n${manifest.toString()}\n`);
-                return this._api.createNamespacedSecret.bind(this._api, manifest.metadata().namespace, manifest.k8sClientObject());
-            }
-            case 'Service': {
-                console.log(`Using service creation strategy for \n${manifest.toString()}\n`);
-                return this._api.createNamespacedService.bind(this._api, manifest.metadata().namespace, manifest.k8sClientObject());
-            }
-            case 'Deployment': {
-                console.log(`Using deployment creation strategy for \n${manifest.toString()}\n`);
-                return this._api.createNamespacedDeployment.bind(this._api, manifest.metadata().namespace, manifest.k8sClientObject());
-            }
-            case 'Namespace': {
-                console.log(`Using namespace creation strategy for \n${manifest.toString()}\n`);
-                return this._api.createNamespace.bind(this._api, manifest.k8sClientObject());
-            }
-            case 'ConfigMap': {
-                console.log(`Using configmap creation strategy for \n${manifest.toString()}\n`);
-                return this._api.createNamespacedConfigMap.bind(this._api, manifest.metadata().namespace, manifest.k8sClientObject());
-            }
-            case 'PersistentVolume': {
-                console.log(`Using persistent volume creation strategy for \n${manifest.toString()}\n`);
-                return this._api.createPersistentVolume.bind(this._api, manifest.k8sClientObject());
-            }
-            case 'PersistentVolumeClaim': {
-                console.log(`Using persistent volume claim creation strategy for \n${manifest.toString()}\n`);
-                return this._api.createNamespacedPersistentVolumeClaim().bind(this._api, manifest.metadata().namespace, manifest.k8sClientObject());
-            }
-            default: {
-                throw new Error(`K8s manifest kind not yet supported. Received: ${manifest.kind()}`);
-            }
+        const kind = manifest.kind();
+
+        let strategy = async () => { };
+        if (this._api[`createNamespaced${kind}`]) {
+            strategy = this._api[`createNamespaced${kind}`].bind(this._api, manifest.metadata().namespace, manifest.k8sClientObject());
+        } else if (this._api[`create${kind}`]) {
+            strategy = this._api[`create${kind}`].bind(this._api, manifest.k8sClientObject());
+        } else {
+            throw new Error(`
+                The creation function for kind ${kind} wasn't found. This may be because it hasn't yet been implemented. Please submit an issue on the github repo relating to this.
+            `)
         }
+
+        return strategy;
     }
 
     _deletionStrategy(manifest) {
 
-        switch(manifest.kind()) {
-            case 'CronJob': {
-                console.log(`Using cron job deletion strategy for \n${manifest.toString()}\n`);
-                return this._api.deleteNamespacedCronJob.bind(this._api, manifest.metadata().name, manifest.metadata().namespace);
-            }
-            case 'Job': {
-                console.log(`Using job deletion strategy for \n${manifest.toString()}\n`);
-                return this._api.deleteNamespacedJob.bind(this._api, manifest.metadata().name, manifest.metadata().namespace);
-            }
-            case 'Pod': {
-                console.log(`Using pod deletion strategy for \n${manifest.toString()}\n`);
-                return this._api.deleteNamespacedPod.bind(this._api, manifest.metadata().name, manifest.metadata().namespace);
-            }
-            case 'Secret': {
-                console.log(`Using secret deletion strategy for \n${manifest.toString()}\n`);
-                return this._api.deleteNamespacedSecret.bind(this._api, manifest.metadata().name, manifest.metadata().namespace);
-            }
-            case 'Service': {
-                console.log(`Using service deletion strategy for \n${manifest.toString()}\n`);
-                return this._api.deleteNamespacedService.bind(this._api, manifest.metadata().name, manifest.metadata().namespace);
-            }
-            case 'Deployment': {
-                console.log(`Using deployment deletion strategy for \n${manifest.toString()}\n`);
-                return this._api.deleteNamespacedDeployment.bind(this._api, manifest.metadata().name, manifest.metadata().namespace);
-            }
-            case 'Namespace': {
-                console.log(`Using namespace deletion strategy for \n${manifest.toString()}\n`);
-                return this._api.deleteNamespace.bind(this._api, manifest.metadata().name);
-            }
-            case 'ConfigMap': {
-                console.log(`Using configmap deletion strategy for \n${manifest.toString()}\n`);
-                return this._api.deleteNamespacedConfigMap.bind(this._api, manifest.metadata().name, manifest.metadata().namespace);
-            }
-            case 'PersistentVolume': {
-                console.log(`Using persistent volume deletion strategy for \n${manifest.toString()}\n`);
-                return this._api.deletePersistentVolume.bind(this._api, manifest.metadata().name);
-            }
-            case 'PersistentVolumeClaim': {
-                console.log(`Using persistent volume claim deletion strategy for \n${manifest.toString()}\n`);
-                return this._api.deleteNamespacedPersistentVolumeClaim.bind(this._api, manifest.metadata().name, manifest.metadata().namespace);
-            }
-            default: {
-                throw new Error(`K8s manifest kind not yet supported. Received: ${manifest.kind()}`);
-            }
+        const kind = manifest.kind();
+
+        let strategy = async () => { };
+        if (this._api[`deleteNamespaced${kind}`]) {
+            strategy = this._api[`deleteNamespaced${kind}`].bind(this._api, manifest.metadata().name, manifest.metadata().namespace);
+        } else if (this._api[`delete${kind}`]) {
+            strategy = this._api[`delete${kind}`].bind(this._api, manifest.metadata().name);
+        } else {
+            throw new Error(`
+                The deletion function for kind ${kind} wasn't found. This may be because it hasn't yet been implemented. Please submit an issue on the github repo relating to this.
+            `)
         }
+
+        return strategy;
     }
 
     _determineApiToUse(parsedYaml) {

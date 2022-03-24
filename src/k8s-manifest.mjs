@@ -29,24 +29,42 @@ class K8sManifest {
 
     _k8sClientObject(typeName, value) {
 
-        if ((typeof value !== 'object') && !(Array.isArray(value)))
+        if (this._baseType(typeName, value)) {
+
+            if (this._dateType(typeName))
+                value = Date.parse(value) || null;
+
             return value;
-
-        if (typeName === 'Date')
-            return Date.parse(value) || null;
-
-        if (typeName.includes('Array')) {
+        } else if (this._arrayType(typeName)) {
 
             return this._handleArrayType(typeName, value);
-
-        } else if (typeName.includes('{')) {
+        } else if (this._mapType(typeName)) {
 
             return this._handleMap(typeName, value);
-
         } else {
 
             return this._handleClientObjectType(typeName, value);
         }
+    }
+
+    _baseType(typeName, value) {
+        return (!this._mapType(typeName) && !this._arrayType(typeName) && !this._object(value)) || this._dateType(typeName);
+    }
+
+    _object(value) {
+        return typeof value === 'object';
+    }
+
+    _dateType(typeName) {
+        return typeName === 'Date';
+    }
+
+    _arrayType(typeName) {
+        return typeName.includes('Array');
+    }
+
+    _mapType(typeName) {
+        return typeName.includes('{');
     }
 
     _attributeTypeMap(typeName, attributeName) {
@@ -73,7 +91,7 @@ class K8sManifest {
 
         let subject = [];
 
-        const elementType = typeName.match(/(?<=\<)(.*?)(?=\>)/)[0];
+        const elementType = typeName.match(/(?<=Array\<)(.*?)(?=\>)/)[0];
 
         if (!elementType) {
             throw new Error(`Could not match array element type for type ${typeName}`);
@@ -90,7 +108,7 @@ class K8sManifest {
 
         let subject = {};
 
-        const propertyType = typeName.match(/(?<=\{ \[key: string\]: )(.*?)(?=; \})/)[0];
+        const propertyType = typeName.match(/(?<=\{ \[key: \w+\]: )(.*?)(?=; \})/)[0];
 
         for (const attribute in value) {
             subject[attribute] = this._k8sClientObject(propertyType, value[attribute]);
