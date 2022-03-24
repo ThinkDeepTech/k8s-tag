@@ -168,7 +168,7 @@ describe('k8s-tag', () => {
             schedule: '* * * * *',
             image: 'busybox:latest',
             command: ['node'],
-            args: ['something', 'else']
+            args: ['src/collect-data.mjs', `--entity-name=google`, `--entity-type=business`, '--operation-type=fetch-tweets']
         };
 
         const subject = k8s`
@@ -220,6 +220,7 @@ describe('k8s-tag', () => {
         expect(container.command[0]).to.equal(options.command[0]);
         expect(container.args[0]).to.equal(options.args[0]);
         expect(container.args[1]).to.equal(options.args[1]);
+        expect(container.args.length).to.equal(options.args.length);
         expect(Array.isArray(container.envFrom)).to.equal(true);
         expect(container.envFrom[0].constructor.name).to.include('EnvFromSource');
         expect(container.envFrom[0].secretRef.constructor.name).to.include('SecretEnvSource');

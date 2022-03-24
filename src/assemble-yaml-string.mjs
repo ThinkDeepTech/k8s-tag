@@ -11,10 +11,10 @@ const assembleYamlString = (strings, args) => {
 
         if (Array.isArray(variable)) {
 
-            if (!variable[0].includes('-')) {
-                variable = JSON.stringify(variable);
-            } else {
+            if (variable[0].includes('\n')) {
                 variable = variable.join(' ');
+            } else {
+                variable = `[${variable.join(', ')}]`;
             }
         }
         yamlString = yamlString.concat(`${variable}`).concat(str);

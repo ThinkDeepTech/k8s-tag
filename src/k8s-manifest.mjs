@@ -1,5 +1,5 @@
-import yaml from "yaml";
 import k8s from "@kubernetes/client-node";
+import yaml from "yaml";
 
 class K8sManifest {
     constructor(parsedYaml) {
@@ -31,8 +31,9 @@ class K8sManifest {
 
         if (this._baseType(typeName, value)) {
 
-            if (this._dateType(typeName))
-                value = Date.parse(value) || null;
+            if (this._dateType(typeName) && !!value) {
+                return new Date(value);
+            }
 
             return value;
         } else if (this._arrayType(typeName)) {
