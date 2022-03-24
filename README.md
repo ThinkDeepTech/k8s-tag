@@ -7,8 +7,8 @@ Tag function allowing interaction with the kubernetes node client through yaml c
 
 # Usage
 The goal of this project is to abstract out the complexity of the [Kubernetes javascript client](https://github.com/kubernetes-client/javascript). Readability is improved by automating construction of K8s client objects that are hard
-to mentally map to the equivalent yaml configuration. Instead, a yaml configuration is applied using the k8s tag which
-is easy to understand, familiar and ubiquitous online.
+to mentally map to the equivalent yaml configuration. Instead, the k8s tag is used with a yaml configuration which
+makes it easier to understand, familiar and examples of yaml configurations are ubiquitous online.
 
 ```javascript
 
@@ -56,6 +56,3 @@ await job.create();
 await job.delete();
 
 ```
-
-This system is undergoing active development and has a ways to go. However, I intend to add support for as many
-kinds and apis as I can. Please create an issue if you test the current capabilities and an issue arises.
