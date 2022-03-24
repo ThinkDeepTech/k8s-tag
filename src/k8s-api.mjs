@@ -18,37 +18,33 @@ class K8sApi {
     _creationStrategy(manifest) {
 
         const kind = manifest.kind();
-
-        let strategy = async () => { };
         if (this._api[`createNamespaced${kind}`]) {
-            strategy = this._api[`createNamespaced${kind}`].bind(this._api, manifest.metadata().namespace, manifest.k8sClientObject());
+
+            return this._api[`createNamespaced${kind}`].bind(this._api, manifest.metadata().namespace, manifest.k8sClientObject());
         } else if (this._api[`create${kind}`]) {
-            strategy = this._api[`create${kind}`].bind(this._api, manifest.k8sClientObject());
+
+            return this._api[`create${kind}`].bind(this._api, manifest.k8sClientObject());
         } else {
             throw new Error(`
                 The creation function for kind ${kind} wasn't found. This may be because it hasn't yet been implemented. Please submit an issue on the github repo relating to this.
             `)
         }
-
-        return strategy;
     }
 
     _deletionStrategy(manifest) {
 
         const kind = manifest.kind();
-
-        let strategy = async () => { };
         if (this._api[`deleteNamespaced${kind}`]) {
-            strategy = this._api[`deleteNamespaced${kind}`].bind(this._api, manifest.metadata().name, manifest.metadata().namespace);
+
+            return this._api[`deleteNamespaced${kind}`].bind(this._api, manifest.metadata().name, manifest.metadata().namespace);
         } else if (this._api[`delete${kind}`]) {
-            strategy = this._api[`delete${kind}`].bind(this._api, manifest.metadata().name);
+
+            return this._api[`delete${kind}`].bind(this._api, manifest.metadata().name);
         } else {
             throw new Error(`
                 The deletion function for kind ${kind} wasn't found. This may be because it hasn't yet been implemented. Please submit an issue on the github repo relating to this.
             `)
         }
-
-        return strategy;
     }
 
     _determineApiToUse(parsedYaml) {
