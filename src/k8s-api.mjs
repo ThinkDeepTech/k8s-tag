@@ -36,7 +36,7 @@ class K8sApi {
 
     _creationStrategy(manifest) {
 
-        const kind = manifest.kind();
+        const kind = manifest.kind;
         if (this._api[`createNamespaced${kind}`]) {
 
             return this._api[`createNamespaced${kind}`].bind(this._api, manifest.metadata.namespace, manifest.k8sClientObject());
@@ -52,7 +52,7 @@ class K8sApi {
 
     _deletionStrategy(manifest) {
 
-        const kind = manifest.kind();
+        const kind = manifest.kind;
         if (this._api[`deleteNamespaced${kind}`]) {
 
             return this._api[`deleteNamespaced${kind}`].bind(this._api, manifest.metadata.name, manifest.metadata.namespace);
