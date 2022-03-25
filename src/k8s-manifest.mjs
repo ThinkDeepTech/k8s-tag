@@ -8,7 +8,9 @@ class K8sManifest {
             throw new Error(`The parsed yaml couldn't be used to construct a k8s object.\n${yaml.stringify(parsedYaml)}`);
 
         this._yaml = parsedYaml;
-        this._obj = this._k8sClientObject(`${this._objectVersion(this._yaml.apiVersion)}${this._yaml.kind}`, this._yaml);
+
+        const objectPrefix = this._objectVersion(this._yaml.apiVersion);
+        this._obj = this._k8sClientObject(`${objectPrefix}${this._yaml.kind}`, this._yaml);
     }
 
     get kind() {

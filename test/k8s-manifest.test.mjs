@@ -566,6 +566,77 @@ describe('k8s-manifest', () => {
         })
     })
 
+    describe('beta cron job mapping', () => {
+
+        let parsedYaml;
+        beforeEach(() => {
+            parsedYaml = {
+                apiVersion: 'batch/v1beta1',
+                kind: 'CronJob',
+                metadata: {
+                    name: 'cron-job'
+                },
+                spec: {
+                    schedule: '* * * * *',
+                    jobTemplate: {
+                        spec: {
+                            template: {
+                                spec: {
+                                    containers: [{
+                                        name: 'container-name',
+                                        image: 'nginx'
+                                    }]
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+        });
+
+        it('should create a k8s client cron job', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.constructor.name).to.include('CronJob');
+            expect(subject.apiVersion).to.equal('batch/v1beta1');
+            expect(subject.kind).to.equal('CronJob');
+        })
+
+        it('should create a k8s client cron job spec', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.constructor.name).to.include('CronJobSpec');
+        })
+
+        it('should correctly map the schedule', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.schedule).to.equal('* * * * *');
+        })
+
+        it('should create a k8s client job template', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.jobTemplate.constructor.name).to.include('JobTemplateSpec');
+        })
+
+        it('should create a k8s client job spec', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.spec.jobTemplate.spec.constructor.name).to.include('JobSpec');
+        })
+    })
+
     describe('deployment mapping', () => {
 
         let parsedYaml;
@@ -1281,6 +1352,50 @@ describe('k8s-manifest', () => {
             expect(subject.metadata.ownerReferences[0].kind).to.equal('Memcached');
             expect(subject.metadata.ownerReferences[0].name).to.equal('example-memcached');
             expect(subject.metadata.ownerReferences[0].uid).to.equal('ad834522-d9a5-4841-beac-991ff3798c00');
+        })
+
+    })
+
+    describe('alpha role mapping', () => {
+
+        let parsedYaml;
+        beforeEach(() => {
+            parsedYaml = {
+                apiVersion: 'rbac.authorization.k8s.io/v1alpha1',
+                kind: 'Role',
+                metadata: {
+                    name: 'alpha-role',
+                    namespace: 'alpha'
+                },
+                rules: [{
+                    apiGroups: [""],
+                    resources: ["pods"],
+                    verbs: ["get", "watch", "list"]
+                }]
+            };
+        });
+
+        it('should correctly map to k8s client role', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(subject.constructor.name).to.include('Role');
+            expect(subject.apiVersion).to.equal('rbac.authorization.k8s.io/v1alpha1');
+        })
+
+        it('should correctly map rules', () => {
+            const manifest = new K8sManifest(parsedYaml);
+
+            const subject = manifest.k8sClientObject();
+
+            expect(Array.isArray(subject.rules)).to.equal(true);
+            expect(subject.rules[0].constructor.name).to.include('PolicyRule');
+            expect(subject.rules[0].apiGroups[0]).to.equal(parsedYaml.rules[0].apiGroups[0]);
+            expect(subject.rules[0].resources[0]).to.equal(parsedYaml.rules[0].resources[0]);
+            expect(subject.rules[0].verbs[0]).to.equal(parsedYaml.rules[0].verbs[0]);
+            expect(subject.rules[0].verbs[1]).to.equal(parsedYaml.rules[0].verbs[1]);
+            expect(subject.rules[0].verbs[2]).to.equal(parsedYaml.rules[0].verbs[2]);
         })
 
     })
