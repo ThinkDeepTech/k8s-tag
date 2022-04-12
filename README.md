@@ -1,9 +1,12 @@
 # k8s-tag
 Tag function allowing interaction with the kubernetes node client through yaml configs.
 
+DEPRECATION WARNING: This has been replaced by [@thinkdeep/k8s](https://github.com/ThinkDeepTech/k8s) and will no longer
+be receiving updates.
+
 # Dependencies
 - [Kubernetes javascript client](https://github.com/kubernetes-client/javascript) v0.15
-- Tested on Node v16.13.1
+- Node v16.14.2 LTS
 
 # Usage
 The goal of this project is to abstract out the complexity of the [Kubernetes javascript client](https://github.com/kubernetes-client/javascript). Readability is improved by automating construction of K8s client objects that are hard
